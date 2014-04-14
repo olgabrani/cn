@@ -1,0 +1,25 @@
+<!doctype html>
+{% load staticfiles %}
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CN - Olga Brani</title>
+        <link rel="stylesheet" href="{% static 'css/app.css' %}"/>
+        <script src="bower_components/modernizr/modernizr.js"></script>
+    </head>
+    <body>
+        {% include 'header.html' %}
+        <div class="row main">
+            {% block main %}
+                Welcome world!
+            {% endblock main %}
+        </div>
+        {% include 'footer.html' %}
+        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="bower_components/foundation/js/foundation.min.js"></script>
+        <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+        <script src="{% static 'js/app.js' %}"></script>
+    </body>
+</html>
+

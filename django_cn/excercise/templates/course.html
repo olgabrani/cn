@@ -2,12 +2,9 @@
 
 {% block main %}
     
-    {% for course in courses %}
         <section class="title">
             <h6>Ακαδημαϊκό έτος: {{course.school_year}}</h6>
-            <h4>
-                <a href="{% url 'course' course.code %}">{{course.name}}</a><br> <span><strong>Oμάδα 1</strong> Τρίτη 10.30-12.45 </span>
-            </h4>
+            <h4>{{course.name}}<br> <span><strong>Oμάδα 1</strong> Τρίτη 10.30-12.45 </span></h4>
         </section>
             {% if course.exercises %}
             <table class="default">
@@ -29,5 +26,4 @@
             {% else %}
                 <p>Δεν υπάρχουν ακόμα ασκήσεις για αυτό το μάθημα</p>
             {% endif %}
-        {% endfor %}
 {% endblock main %}
