@@ -9,25 +9,6 @@
                 <a href="{% url 'course' course.code %}">{{course.name}}</a><br> <span><strong>Oμάδα 1</strong> Τρίτη 10.30-12.45 </span>
             </h4>
         </section>
-            {% if course.exercises %}
-            <table class="default">
-                <tr>
-                    <th>#</th>
-                    <th width="60%">Άσκηση</th>
-                    <th>Υποβολή</th>
-                    <th>Εκφώνηση</th>
-                </tr>
-                {% for exercise in course.exercises %}
-                <tr>
-                    <td>{{ exercise.number }}</td>
-                    <td>{{ exercise.title }}</td>
-                    <td><a href="askisi.html">Ανοιχτό</a></td>
-                    <td><a href="">PDF</a></td>
-                </tr>
-               {% endfor %}
-            </table>
-            {% else %}
-                <p>Δεν υπάρχουν ακόμα ασκήσεις για αυτό το μάθημα</p>
-            {% endif %}
-        {% endfor %}
+        {% include 'exercises_table.html' %}        
+    {% endfor %}
 {% endblock main %}

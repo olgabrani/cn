@@ -1,0 +1,20 @@
+            {% if course.exercises %}
+            <table class="default">
+                <tr>
+                    <th>#</th>
+                    <th width="60%">Άσκηση</th>
+                    <th>Υποβολή</th>
+                    <th>Εκφώνηση</th>
+                </tr>
+                {% for exercise in course.exercises %}
+                <tr>
+                    <td>{{ exercise.number }}</td>
+                    <td>{{ exercise.title }}</td>
+                    <td><a href="{% url 'exercise' course.code exercise.number %}">Ανοιχτό</a></td>
+                    <td><a href="">PDF</a></td>
+                </tr>
+               {% endfor %}
+            </table>
+            {% else %}
+                <p>Δεν υπάρχουν ακόμα ασκήσεις για αυτό το μάθημα</p>
+            {% endif %}
