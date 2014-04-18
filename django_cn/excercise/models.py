@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from django.db import models
 from datetime import datetime, date
+
 
 class Course(models.Model):
 
@@ -58,3 +60,40 @@ class Question(models.Model):
     def __unicode__(self):
         return self.text[0:256]
 
+class MdlUser(models.Model):
+    
+    confirmed = models.IntegerField()
+    deleted = models.IntegerField()
+    suspended = models.IntegerField()
+    username = models.CharField(max_length=100)
+    password = models.CharField(max_length=255)
+    idnumber = models.CharField(max_length=255)
+    firstname = models.CharField(max_length=100)
+    lastname = models.CharField(max_length=100)
+    email = models.CharField(max_length=100)
+   
+    def is_enrolled(self, course_code):
+        return self.username
+
+    class Meta:
+        managed = False
+        db_table = 'mdl_user'
+
+class MdlCourse(models.Model):
+    
+    shortname = models.CharField(max_length=255)
+    idnumber = models.CharField(max_length=100)
+        
+    class Meta:
+        managed = False
+        db_table = 'mdl_course'
+
+class MdlUserEnrolments(models.Model):
+
+    status = models.BigIntegerField()
+    enrolid = models.BigIntegerField()
+    userid = models.BigIntegerField()
+        
+    class Meta:
+        managed = False
+        db_table = 'mdl_user_enrolments'

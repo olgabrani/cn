@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block main %}
+<div class="small-6 large-centered columns panel">
+    <h3>Login</h3>
+    <form method="post" action="{% url 'django.contrib.auth.views.login' %}">
+     {% csrf_token %}
+        <p>
+            <label for="username">Username</label>
+            <input type="text" name="username" />
+        </p>
+        <p>
+            <label for="password">Password</label>
+            <input type="password" name="password" />
+        </p>
+        {% if form.errors %}
+            <p class="error">Sorry, that's not a valid username or password</p>
+        {% endif %}
+        <p>
+            <input type="submit" class="button" value="Eίσοδος"/>
+        </p>
+    </form>
+</div>
+{% endblock main %}

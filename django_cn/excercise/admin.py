@@ -1,5 +1,6 @@
 from django.contrib import admin
 from excercise.models import Course, Exercise, Question
+from django.contrib.auth.models import User
 
 
 class QuestionInline(admin.StackedInline):
