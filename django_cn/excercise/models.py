@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from django.db import models
 from datetime import datetime, date
 
-
 class Course(models.Model):
 
     name = models.CharField(max_length=128)
@@ -97,3 +96,4 @@ class MdlUserEnrolments(models.Model):
     class Meta:
         managed = False
         db_table = 'mdl_user_enrolments'
+

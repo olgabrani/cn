@@ -4,6 +4,12 @@ from django.template import RequestContext
 from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
+from django.contrib.auth.decorators import user_passes_test
+
+def is_examiner(user):
+    # Can be used as a decoreator @user_passes_test(is_examiner)
+    return user.groups.filter(name='examiner')
+
 
 @login_required
 def index(request):
@@ -15,7 +21,7 @@ def index(request):
     mdlcourses = MdlCourse.objects.using('users').all()
     enrolments = MdlUserEnrolments.objects.using('users').all()
 
-    return render_to_response('index.html',{'courses':courses, 'users':mdlusers, 'mdlcourses':mdlcourses, 'enrolments':enrolments}, context)
+    return render_to_response('index.html',{'courses':courses, 'users':mdlusers, 'mdlcourses':mdlcourses, 'enrolments':enrolments, }, context)
 
 
 @login_required
