@@ -2,7 +2,7 @@
 {% block main %}
 <div class="small-6 large-centered columns panel">
     <h3>Login</h3>
-    <form method="post" action="{% url 'django.contrib.auth.views.login' %}">
+    <form method="post" action="{% url 'excercise.views.custom_login' %}">
      {% csrf_token %}
         <p>
             <label for="username">Username</label>

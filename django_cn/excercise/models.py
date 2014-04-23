@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from datetime import datetime, date
+from django.contrib.auth.models import User
 
 class Course(models.Model):
 
@@ -97,3 +98,11 @@ class MdlUserEnrolments(models.Model):
         managed = False
         db_table = 'mdl_user_enrolments'
 
+class ProxyUser(User):
+
+    class Meta:
+        proxy = True
+
+    @property
+    def is_moodle_user(self):
+        return 'foo'

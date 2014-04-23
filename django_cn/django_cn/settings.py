@@ -105,7 +105,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages"
 )
-LOGIN_REDIRECT_URL = '/excercise/'
+
+USER_LOGIN_REDIRECT_URL = '/excercise/'
+EXAMINER_LOGIN_REDIRECT_URL = '/excercise/examiner/'
 
 try:
     from local_settings import *

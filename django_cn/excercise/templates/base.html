@@ -6,7 +6,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>CN - Olga Brani</title>
         <link rel="stylesheet" href="{% static 'css/app.css' %}"/>
-        <script src="bower_components/modernizr/modernizr.js"></script>
     </head>
     <body>
         {% include 'header.html' %}
@@ -16,8 +15,8 @@
                 {% endblock main %}
         </div>
         {% include 'footer.html' %}
-        <script src="bower_components/jquery/dist/jquery.min.js"></script>
-        <script src="bower_components/foundation/js/foundation.min.js"></script>
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script src="{% static 'js/foundation.min.js' %}"></script>
         <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
         <script src="{% static 'js/app.js' %}"></script>
     </body>
