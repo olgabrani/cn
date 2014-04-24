@@ -1,7 +1,7 @@
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments
+from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import user_passes_test
@@ -23,8 +23,10 @@ def index(request):
     mdlusers = MdlUser.objects.using('users').all()
     mdlcourses = MdlCourse.objects.using('users').all()
     enrolments = MdlUserEnrolments.objects.using('users').all()
+    proxyUser = ProxyUser.objects.get(pk=request.user.pk)
 
-    return render_to_response('index.html',{'courses':courses, 'users':mdlusers, 'mdlcourses':mdlcourses, 'enrolments':enrolments, }, context)
+    return render_to_response('index.html',{'courses':courses, 'users':mdlusers, 'mdlcourses':mdlcourses, 'enrolments':enrolments,'proxyUser':proxyUser
+    }, context)
 
 
 @login_required
