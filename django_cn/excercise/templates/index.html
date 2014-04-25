@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% block main %}
-   {% for mdlcourse in mdlcourses %}
-        {{mdlcourse.shortname}}
-   {% endfor %}
-   {% if proxyUser.is_moodle_user%} einai xristis moodle {% endif %}
-    {% for course in courses %}
+    {% for course in proxyUser.enrolled_courses %}
         <section class="title">
             <h6>Ακαδημαϊκό έτος: {{course.school_year}}</h6>
             <h4>
@@ -12,5 +8,7 @@
             </h4>
         </section>
         {% include 'exercises_table.html' %}        
+    {% empty %}
+        Δεν έχεις γραφτεί σε κάποιο μάθημα
     {% endfor %}
 {% endblock main %}

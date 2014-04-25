@@ -74,6 +74,7 @@ class MdlUser(models.Model):
    
     def is_enrolled(self, course_code):
         return self.username
+   
 
     class Meta:
         managed = False
@@ -93,10 +94,25 @@ class MdlUserEnrolments(models.Model):
     status = models.BigIntegerField()
     enrolid = models.BigIntegerField()
     userid = models.BigIntegerField()
-        
+    
+    @property
+    def course_code(self):
+        courseid = MdlEnrol.objects.using('users').get(pk=self.enrolid).courseid
+        course_code = MdlCourse.objects.using('users').get(pk=courseid).shortname
+        return course_code
+
     class Meta:
         managed = False
         db_table = 'mdl_user_enrolments'
+
+class MdlEnrol(models.Model):
+    enrol = models.CharField(max_length=20)
+    status = models.BigIntegerField()
+    courseid = models.BigIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'mdl_enrol'
 
 class ProxyUser(User):
 
@@ -106,3 +122,14 @@ class ProxyUser(User):
     @property
     def is_moodle_user(self):
         return MdlUser.objects.using('users').get(username=self.username)
+
+    @property
+    def enrolled_courses(self):
+        if self.is_moodle_user:
+            course_codes = []
+            enrolments = MdlUserEnrolments.objects.using('users').filter(userid=self.is_moodle_user.pk)
+            for e in enrolments:
+                course_codes.append(e.course_code)
+            print course_codes
+            enrolled_courses = Course.objects.filter(code__in=course_codes)
+            return enrolled_courses
