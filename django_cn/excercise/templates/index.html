@@ -3,7 +3,7 @@
    {% for mdlcourse in mdlcourses %}
         {{mdlcourse.shortname}}
    {% endfor %}
-   {{proxyUser.is_moodle_user}}
+   {% if proxyUser.is_moodle_user%} einai xristis moodle {% endif %}
     {% for course in courses %}
         <section class="title">
             <h6>Ακαδημαϊκό έτος: {{course.school_year}}</h6>

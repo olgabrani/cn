@@ -105,4 +105,4 @@ class ProxyUser(User):
 
     @property
     def is_moodle_user(self):
-        return 'foo'
+        return MdlUser.objects.using('users').get(username=self.username)
