@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block main %}
+gia eksetastes
+ <section class="title">
+                <h4>{{ course.name }}<br> <span><strong>Oμάδα 1</strong> Τρίτη 10.30-12.45 </span></h4>
+                <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title}}</h3>
+            </section>
+            <section class="qas">
+                <form>
+                    <div class="theory">
+                        {{ exercise.theory|safe }}
+                    </div>
+                    {% for question in exercise.questions %} 
+                    <div class="qa">
+                        <div class="qa-desc panel">
+                            <p class="num">{{ question.order }}</p>
+                            <p>{{ question.text }}</p>
+                        </div>
+                        {% if question.answer_type == "T" %}
+                        <textarea placeholder="{{ question.order }} Απάντηση"></textarea>
+                        {% elif question.answer_type == "I" %}
+                        <label for="file">{{ question.order }} Απάντηση</label>
+                        <input type="file" name="file" id="file" />
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <p class="submit">
+                        <button>Προσωρινή Αποθήκευση </button>
+                        <button type="submit" class="button success"data-reveal-id="unanswered" data-reveal>Υποβολή</button>
+                    </p>
+                </form>
+            </section>
+{% endblock main %}

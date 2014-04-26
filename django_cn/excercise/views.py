@@ -47,15 +47,6 @@ def exercise(request, course_code, exercise_number):
 
     return render_to_response('exercise.html',{'course':course, 'exercise':exercise}, context)
 
-@login_required
-@user_passes_test(is_examiner)
-def examiner_index(request):
-    
-    context = RequestContext(request)
-
-    return render_to_response('examiner/index.html', context)
-
-
 def custom_login(request):
     context = RequestContext(request)
     username = request.POST.get('username', False)
@@ -80,3 +71,44 @@ def custom_logout(request):
     logout(request)
     # Take the user back to the homepage.
     return HttpResponseRedirect('/accounts/login')
+
+@login_required
+@user_passes_test(is_examiner)
+def examiner_index(request):
+    
+    context = RequestContext(request)
+
+    return render_to_response('examiner/index.html', context)
+
+@login_required
+@user_passes_test(is_examiner)
+def list_course(request, course_code):
+    
+    context = RequestContext(request)
+
+    return render_to_response('examiner/list.html', context)
+
+@login_required
+@user_passes_test(is_examiner)
+def list_exercise(request, course_code, exercise_number):
+    
+    context = RequestContext(request)
+
+    return render_to_response('examiner/list.html', context)
+
+@login_required
+@user_passes_test(is_examiner)
+def list_team(request, course_code, exercise_number, team_id):
+    
+    context = RequestContext(request)
+
+    return render_to_response('examiner/list.html', context)
+
+@login_required
+@user_passes_test(is_examiner)
+def answer(request, course_code, exercise_number, team_id, user_id):
+    
+    context = RequestContext(request)
+
+    return render_to_response('examiner/exercise.html', context)
+

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block main %}
+<section class="title">
+<h6>Ακαδημαϊκό έτος: 2009-2010</h6>
+<h4>Δίκτυα Υπολογιστών</h4>
+</section>
+<table class="default sortable">
+    <thead>
+        <tr>
+            <th><input type="checkbox" /></th>
+            <th>Ασκηση</th>
+            <th>Ομάδα</th>
+            <th>Ονοματεπώνυμο</th>
+            <th>Ημ/νία υποβολής</th>
+            <th>Βαθμός</th>
+            <th>PDF</th>
+            <th>View</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><input type="checkbox" /></td>
+            <td>1</td>
+            <td>2</td>
+            <td>Nikos Papadopoulos</td>
+            <td>20/05/2014</td>
+            <td><input type="text" class="grade" /></td>
+            <td><a href="">Download</a></td>
+            <td><a href="admin-askisi.html">View</a></td>
+        </tr>
+        <tr>
+            <td><input type="checkbox" /></td>
+            <td>1</td>
+            <td>2</td>
+            <td>Olga Brani</td>
+            <td>16/05/2014</td>
+            <td><input type="text" class="grade"/></td>
+            <td><a href="">Download</a></td>
+            <td><a href="admin-askisi.html">View</a></td>
+        </tr>
+        <tr>
+            <td><input type="checkbox" /></td>
+            <td>2</td>
+            <td>2</td>
+            <td>Olga Brani</td>
+            <td>20/04/2014</td>
+            <td><input type="text" class="grade" /></td>
+            <td><a href="">Download</a></td>
+            <td><a href="admin-askisi.html">View</a></td>
+        </tr>
+        <tr>
+            <td><input type="checkbox" /></td>
+            <td>2</td>
+            <td>2</td>
+            <td>Anna Pappa</td>
+            <td>10/05/2014</td>
+            <td><input type="text" class="grade" /></td>
+            <td><a href="">Download</a></td>
+            <td><a href="admin-askisi.html">View</a></td>
+        </tr>
+        <tr>
+            <td><input type="checkbox" /></td>
+            <td>3</td>
+            <td>2</td>
+            <td>Olga Brani</td>
+            <td>12/04/2014</td>
+            <td><input type="text" class="grade" /></td>
+            <td><a href="">Download</a></td>
+            <td><a href="admin-askisi.html">View</a></td>
+        </tr>
+    </tbody>
+</table>
+<p class="submit">
+<button type="submit" class="button success" style="float:right;">Αποθήκευη βαθμών</button>
+<button type="submit" class="button info">PDFs επιλεγμένων</button>
+
+</p>
+{% endblock main %}
