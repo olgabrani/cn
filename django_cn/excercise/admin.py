@@ -1,5 +1,5 @@
 from django.contrib import admin
-from excercise.models import Course, Exercise, Question
+from excercise.models import Course, Exercise, Question, Submission
 from django.contrib.auth.models import User
 
 
@@ -13,4 +13,5 @@ class ExerciseAdmin(admin.ModelAdmin):
     ]
 
 admin.site.register(Course)
+admin.site.register(Submission)
 admin.site.register(Exercise, ExerciseAdmin)

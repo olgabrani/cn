@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
@@ -19,14 +20,7 @@ def index(request):
     # Request the context of the request.
     # The context contains information such as the client's machine details, for example.
     context = RequestContext(request)
-    courses = Course.objects.all()
-    mdlusers = MdlUser.objects.using('users').all()
-    mdlcourses = MdlCourse.objects.using('users').all()
-    enrolments = MdlUserEnrolments.objects.using('users').all()
-    proxyUser = ProxyUser.objects.get(pk=request.user.pk)
-
-    return render_to_response('index.html',{'courses':courses, 'users':mdlusers, 'mdlcourses':mdlcourses, 'enrolments':enrolments,'proxyUser':proxyUser
-    }, context)
+    return render_to_response('index.html', context)
 
 
 @login_required
@@ -34,8 +28,15 @@ def course(request, course_code):
 
     context = RequestContext(request)
     course = Course.objects.get(code=course_code)
+    exercises = course.exercises
+    for e in exercises:
+        e.submission_state = e.submission_state(request.proxyUser)
+        e.has_submission_link = False
+        has_link = [u'Ημιτελής', u'Ανοιχτή']
+        if e.submission_state in has_link: 
+            e.has_submission_link = True
+    return render_to_response('course.html',{'course':course, 'exercises':exercises }, context)
 
-    return render_to_response('course.html',{'course':course}, context)
 
 
 @login_required
@@ -44,6 +45,7 @@ def exercise(request, course_code, exercise_number):
     context = RequestContext(request)
     course = Course.objects.get(code=course_code)
     exercise = Exercise.objects.get(course=course,number=exercise_number)
+    
 
     return render_to_response('exercise.html',{'course':course, 'exercise':exercise}, context)
 

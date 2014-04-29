@@ -40,6 +40,16 @@ class Exercise(models.Model):
     def questions(self):
         return self.question_set.all()
 
+    def submission_state(self, user):
+
+        dict = {'I': 'Ημιτελής', 'C': 'Διορθωμένη', 'S': 'Υπεβλήθη'}
+        try:
+            submission_obj = Submission.objects.get(exercise = self, student=user).state
+            submission = dict.get(submission_obj)
+        except:
+            submission = 'Ανοιχτή'
+        return submission    
+
     def __unicode__(self):
         return self.title
 
@@ -59,6 +69,37 @@ class Question(models.Model):
     
     def __unicode__(self):
         return self.text[0:256]
+
+class Answer(models.Model):
+
+    question = models.ForeignKey(Question)
+    student = models.ForeignKey(User)
+    answer = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.question.order+' Student: ' +self.student.username
+
+    class Meta:
+        managed = False
+
+class Submission(models.Model):
+    
+    SUBMISSION_STATE = (
+        ('I', 'incomplete'),
+        ('S', 'submitted'),
+        ('C', 'corrected'),
+    )
+    
+
+    exercise = models.ForeignKey(Exercise)
+    student = models.ForeignKey(User)
+    date_modified = models.DateField(auto_now=True)
+    state = models.CharField(max_length=1, choices = SUBMISSION_STATE, default='I')
+    grade = models.CharField(max_length=2, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.student.username+ 'Grade: '+self.grade
+
 
 class MdlUser(models.Model):
     
@@ -113,6 +154,24 @@ class MdlEnrol(models.Model):
     class Meta:
         managed = False
         db_table = 'mdl_enrol'
+
+class MdlGroups(models.Model):
+    
+    courseid = models.BigIntegerField()
+    name = models.CharField(max_length=254)
+    
+    class Meta:
+        managed = False
+        db_table = 'mdl_groups'
+
+class MdlGroupsMembers(models.Model):
+        
+    groupid = models.BigIntegerField()
+    userid = models.BigIntegerField()
+                            
+    class Meta:
+        managed = False
+        db_table = 'mdl_groups_members'
 
 class ProxyUser(User):
 

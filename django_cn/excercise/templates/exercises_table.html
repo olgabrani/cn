@@ -6,11 +6,19 @@
                     <th>Υποβολή</th>
                     <th>Εκφώνηση</th>
                 </tr>
-                {% for exercise in course.exercises %}
+                {% for exercise in exercises %}
                 <tr>
                     <td>{{ exercise.number }}</td>
                     <td>{{ exercise.title }}</td>
-                    <td><a href="{% url 'exercise' course.code exercise.number %}">Ανοιχτό</a></td>
+                    <td>
+                        {% if exercise.has_submission_link %}
+                        <a href="{% url 'exercise' course.code exercise.number %}">
+                            {{ exercise.submission_state}}
+                        </a>
+                        {% else %}
+                            {{ exercise.submission_state}}
+                        {% endif %}
+                    </td>
                     <td><a href="">PDF</a></td>
                 </tr>
                {% endfor %}
