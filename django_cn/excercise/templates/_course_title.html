@@ -1,0 +1,13 @@
+<section class="title">
+            <h6>Ακαδημαϊκό έτος:{{course.school_year}}</h6>
+            <h4>
+                {% if has_course_link %}
+                <a href="{% url 'course' course.code %}">
+                {% endif %}
+                    {{course.name}}
+                {% if has_course_link %}
+                </a>
+                {% endif %}
+                <br> <span><strong>{{course.group}}</strong> </span>
+            </h4>
+        </section>

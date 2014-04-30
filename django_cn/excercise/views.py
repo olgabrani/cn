@@ -20,7 +20,8 @@ def index(request):
     # Request the context of the request.
     # The context contains information such as the client's machine details, for example.
     context = RequestContext(request)
-    return render_to_response('index.html', context)
+    has_course_link = True
+    return render_to_response('index.html',{'has_course_link':has_course_link}, context)
 
 
 @login_required

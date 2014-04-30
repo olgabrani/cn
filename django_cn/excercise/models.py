@@ -22,6 +22,22 @@ class Course(models.Model):
     def exercises(self):
         return self.exercise_set.filter(is_active=True)
     
+    def get_group(self, user):
+        userid = user.is_moodle_user.pk
+        try:
+            groupid = MdlGroupsMembers.objects.using('users').get(userid=userid).groupid
+            try: 
+                courseid = MdlCourse.objects.using('users').get(shortname=self.code).pk
+                group = MdlGroups.objects.using('users').get(pk=groupid, courseid=courseid)
+                group_name = group.name
+            except:
+                group_name = ''
+        except: 
+            group_name = ''
+
+        return group_name 
+
+
     def __unicode__(self):
         return self.name + ' ( Code:' + self.code +' )'
 
@@ -191,4 +207,6 @@ class ProxyUser(User):
                 course_codes.append(e.course_code)
             print course_codes
             enrolled_courses = Course.objects.filter(code__in=course_codes)
+            for e in enrolled_courses:
+                e.group = e.get_group(self)
             return enrolled_courses
