@@ -5,7 +5,6 @@ from datetime import datetime, date
 from django.contrib.auth.models import User
 
 class Course(models.Model):
-
     name = models.CharField(max_length=128)
     code = models.CharField(max_length=64)
 
@@ -43,7 +42,6 @@ class Course(models.Model):
 
 
 class Exercise(models.Model):
-    
     title = models.TextField()
     subtitle = models.TextField(null=True, blank=True)
     theory = models.TextField(null=True, blank=True)
@@ -55,6 +53,10 @@ class Exercise(models.Model):
     @property
     def questions(self):
         return self.question_set.all()
+
+    @property
+    def course_code(self):
+        return self.course.code
 
     def submission_state(self, user):
 
@@ -70,7 +72,6 @@ class Exercise(models.Model):
         return self.title
 
 class Question(models.Model):
-    
     ANSWER_TYPE_CHOICES = (
         ('T', 'Text'),
         ('I', 'Image File'),
@@ -87,7 +88,6 @@ class Question(models.Model):
         return self.text[0:256]
 
 class Answer(models.Model):
-
     question = models.ForeignKey(Question)
     student = models.ForeignKey(User)
     answer = models.TextField(null=True, blank=True)
@@ -99,7 +99,6 @@ class Answer(models.Model):
         managed = False
 
 class Submission(models.Model):
-    
     SUBMISSION_STATE = (
         ('I', 'incomplete'),
         ('S', 'submitted'),
@@ -118,7 +117,6 @@ class Submission(models.Model):
 
 
 class MdlUser(models.Model):
-    
     confirmed = models.IntegerField()
     deleted = models.IntegerField()
     suspended = models.IntegerField()
@@ -138,7 +136,6 @@ class MdlUser(models.Model):
         db_table = 'mdl_user'
 
 class MdlCourse(models.Model):
-    
     shortname = models.CharField(max_length=255)
     idnumber = models.CharField(max_length=100)
         
@@ -147,7 +144,6 @@ class MdlCourse(models.Model):
         db_table = 'mdl_course'
 
 class MdlUserEnrolments(models.Model):
-
     status = models.BigIntegerField()
     enrolid = models.BigIntegerField()
     userid = models.BigIntegerField()
@@ -172,7 +168,6 @@ class MdlEnrol(models.Model):
         db_table = 'mdl_enrol'
 
 class MdlGroups(models.Model):
-    
     courseid = models.BigIntegerField()
     name = models.CharField(max_length=254)
     
@@ -181,7 +176,6 @@ class MdlGroups(models.Model):
         db_table = 'mdl_groups'
 
 class MdlGroupsMembers(models.Model):
-        
     groupid = models.BigIntegerField()
     userid = models.BigIntegerField()
                             
@@ -190,7 +184,6 @@ class MdlGroupsMembers(models.Model):
         db_table = 'mdl_groups_members'
 
 class ProxyUser(User):
-
     class Meta:
         proxy = True
 

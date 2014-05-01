@@ -2,7 +2,7 @@
 {% block main %}
     {% for course in request.proxyUser.enrolled_courses %}
         {% include '_course_title.html' %}
-                {% include '_exercises_table.html' %}        
+        {% include '_exercises_table.html' %}        
     {% empty %}
         Δεν έχεις γραφτεί σε κάποιο μάθημα
     {% endfor %}

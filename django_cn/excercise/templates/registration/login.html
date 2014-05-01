@@ -12,8 +12,8 @@
             <label for="password">Password</label>
             <input type="password" name="password" />
         </p>
-        {% if form.errors %}
-            <p class="error">Sorry, that's not a valid username or password</p>
+        {% if error %}
+            <p class="error">{{error}}</p>
         {% endif %}
         <p>
             <input type="submit" class="button" value="Eίσοδος"/>

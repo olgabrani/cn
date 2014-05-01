@@ -21,7 +21,17 @@ def index(request):
     # The context contains information such as the client's machine details, for example.
     context = RequestContext(request)
     has_course_link = True
-    return render_to_response('index.html',{'has_course_link':has_course_link}, context)
+    courses = Course.objects.all().select_related()
+    res = []
+    for c in courses:
+        for e in c.exercises:
+            e.submission_state = e.submission_state(request.proxyUser)
+            e.has_submission_link = False
+            has_link = [u'Ημιτελής', u'Ανοιχτή']
+            if e.submission_state in has_link: 
+                e.has_submission_link = True
+            res.append({'course_code': c.code, 'title':e.title, 'number':e.number, 'submission_state':e.submission_state, 'has_submission_link':e.has_submission_link})
+    return render_to_response('index.html',{'has_course_link':has_course_link, 'exercises':res}, context)
 
 
 @login_required
@@ -43,8 +53,14 @@ def course(request, course_code):
 @login_required
 def exercise(request, course_code, exercise_number):
 
+    if request.method == 'POST':
+        return render_to_response('index')
     context = RequestContext(request)
     course = Course.objects.get(code=course_code)
+    try:
+        course.group = course.get_group(request.proxyUser) 
+    except:
+        course.group = False
     exercise = Exercise.objects.get(course=course,number=exercise_number)
     
 
@@ -55,7 +71,7 @@ def custom_login(request):
     username = request.POST.get('username', False)
     password = request.POST.get('password', False)
     user = authenticate(username=username, password=password)
-
+    error = ''
     if user is not None:
         if user.is_active:
             login(request, user)
@@ -64,9 +80,12 @@ def custom_login(request):
             else:
                 return HttpResponseRedirect(settings.USER_LOGIN_REDIRECT_URL)
         else:
-            print 'skata'
+            print 'error'
     else:
-        return render_to_response('registration/login.html', {}, context)
+        if request.method =='POST':
+            error = 'You have an error in your username/password combination or you are not registered to moodle'
+        return render_to_response('registration/login.html', {'error':error}, context)
+
 
 @login_required
 def custom_logout(request):

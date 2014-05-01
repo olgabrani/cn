@@ -7,6 +7,7 @@
                     <th>Εκφώνηση</th>
                 </tr>
                 {% for exercise in exercises %}
+                {% if exercise.course_code == course.code %}
                 <tr>
                     <td>{{ exercise.number }}</td>
                     <td>{{ exercise.title }}</td>
@@ -21,6 +22,7 @@
                     </td>
                     <td><a href="">PDF</a></td>
                 </tr>
+                {% endif %}
                {% endfor %}
             </table>
             {% else %}
