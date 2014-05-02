@@ -58,6 +58,14 @@ class Exercise(models.Model):
     def course_code(self):
         return self.course.code
 
+    def submission_code(self, user):
+        try:
+            submission_code = Submission.objects.get(exercise = self, student = user).state
+        except:
+            submission_code = 'O'
+        return submission_code
+
+
     def submission_state(self, user):
 
         dict = {'I': 'Ημιτελής', 'C': 'Διορθωμένη', 'S': 'Υπεβλήθη'}

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser
@@ -33,15 +33,20 @@ def index(request):
             res.append({'course_code': c.code, 'title':e.title, 'number':e.number, 'submission_state':e.submission_state, 'has_submission_link':e.has_submission_link})
     return render_to_response('index.html',{'has_course_link':has_course_link, 'exercises':res}, context)
 
+@login_required
+def student_redir(request):
+     return redirect('index')
 
 @login_required
 def course(request, course_code):
 
     context = RequestContext(request)
     course = Course.objects.get(code=course_code)
+    course.group = course.get_group(request.proxyUser)
     exercises = course.exercises
     for e in exercises:
         e.submission_state = e.submission_state(request.proxyUser)
+        e.submission_code = e.submission_code(request.proxyUser)
         e.has_submission_link = False
         has_link = [u'Ημιτελής', u'Ανοιχτή']
         if e.submission_state in has_link: 
@@ -54,7 +59,9 @@ def course(request, course_code):
 def exercise(request, course_code, exercise_number):
 
     if request.method == 'POST':
-        return render_to_response('index')
+        submission_code = request.POST.get('submission_code', 'O')
+        print submission_code
+        return redirect('index')
     context = RequestContext(request)
     course = Course.objects.get(code=course_code)
     try:
@@ -62,7 +69,8 @@ def exercise(request, course_code, exercise_number):
     except:
         course.group = False
     exercise = Exercise.objects.get(course=course,number=exercise_number)
-    
+    exercise.submission_code = exercise.submission_code(request.proxyUser)
+
 
     return render_to_response('exercise.html',{'course':course, 'exercise':exercise}, context)
 
