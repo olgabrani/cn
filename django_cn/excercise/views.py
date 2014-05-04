@@ -2,7 +2,7 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser
+from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import user_passes_test
@@ -113,13 +113,29 @@ def examiner_index(request):
 @login_required
 @user_passes_test(is_examiner)
 def grading_list(request, course_code, exercise_number=None, team_id=None):
-   
+    
+    submissions = Submission.objects.filter(state='S').select_related()
+    res = []
+    for s in submissions:
+        exercise_number = s.exercise.number
+        username = s.student.username
+        date_modified = s.date_modified
+        grade = s.grade
+        group = Course.objects.get(code=course_code).get_group(s.student)
+        res.append({
+            'exercise_number': exercise_number,
+            'username': username,
+            'date_modified': date_modified,
+            'grade': grade,
+            'group': group,
+        })
     filtering = request.GET.get('filtering')
     context = RequestContext(request)
     my_dict = { 'course_code': course_code,
                 'exercise_number': exercise_number,
                 'team_id': team_id,
-                'filtering':filtering
+                'filtering': filtering,
+                'res': res,
               }
     return render_to_response('examiner/list.html', my_dict, context)
 

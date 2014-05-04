@@ -22,7 +22,8 @@ class Course(models.Model):
         return self.exercise_set.filter(is_active=True)
     
     def get_group(self, user):
-        userid = user.is_moodle_user.pk
+        #userid = user.is_moodle_user.pk
+        userid = user.pk
         try:
             groupid = MdlGroupsMembers.objects.using('users').get(userid=userid).groupid
             try: 
