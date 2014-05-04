@@ -20,14 +20,14 @@
     <tr>
         <td>1</td>
         <td>
-            <a href="admin-list.html" class="correctable">10 αδιόρθωτες</a>
-            <a href="admin-list.html" class="corrected"> 5 διορθωμένες</a>
+            <a href="{% url 'grading_list' 'DY2014' %}" class="correctable">10 αδιόρθωτες</a>
+            <a href="{% url 'grading_list' 'DY2014' 1 %}" class="corrected"> 5 διορθωμένες</a>
         </td>
         <td>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
+            <a href="{% url 'grading_list' 'DY2014' 1 1 %}" class="corrected"> 5 διορθωμένες</a>
         </td>
         <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
+            <a href="{% url 'grading_list' 'DY2014' 1 1 %}?filtering=all">10 αδιόρθωτες</a>
         </td>
         <td>
             <a href="" class="correctable">10 αδιόρθωτες</a>

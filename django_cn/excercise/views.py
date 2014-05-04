@@ -112,27 +112,16 @@ def examiner_index(request):
 
 @login_required
 @user_passes_test(is_examiner)
-def list_course(request, course_code):
-    
+def grading_list(request, course_code, exercise_number=None, team_id=None):
+   
+    filtering = request.GET.get('filtering')
     context = RequestContext(request)
-
-    return render_to_response('examiner/list.html', context)
-
-@login_required
-@user_passes_test(is_examiner)
-def list_exercise(request, course_code, exercise_number):
-    
-    context = RequestContext(request)
-
-    return render_to_response('examiner/list.html', context)
-
-@login_required
-@user_passes_test(is_examiner)
-def list_team(request, course_code, exercise_number, team_id):
-    
-    context = RequestContext(request)
-
-    return render_to_response('examiner/list.html', context)
+    my_dict = { 'course_code': course_code,
+                'exercise_number': exercise_number,
+                'team_id': team_id,
+                'filtering':filtering
+              }
+    return render_to_response('examiner/list.html', my_dict, context)
 
 @login_required
 @user_passes_test(is_examiner)
