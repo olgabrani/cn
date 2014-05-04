@@ -22,20 +22,19 @@ class Course(models.Model):
         return self.exercise_set.filter(is_active=True)
     
     def get_group(self, user):
-        #userid = user.is_moodle_user.pk
-        userid = user.pk
+
+        userid = MdlUser.objects.using('users').get(username=user.username).pk
         try:
             groupid = MdlGroupsMembers.objects.using('users').get(userid=userid).groupid
             try: 
                 courseid = MdlCourse.objects.using('users').get(shortname=self.code).pk
                 group = MdlGroups.objects.using('users').get(pk=groupid, courseid=courseid)
-                group_name = group.name
             except:
-                group_name = ''
+                group = None
         except: 
-            group_name = ''
+            group = None
 
-        return group_name 
+        return group 
 
 
     def __unicode__(self):

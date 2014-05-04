@@ -24,6 +24,10 @@ def index(request):
     courses = Course.objects.all().select_related()
     res = []
     for c in courses:
+        try:
+            c.group_name = c.get_group(request.proxyUser).name
+        except:
+            c.group_name = None
         for e in c.exercises:
             e.submission_state = e.submission_state(request.proxyUser)
             e.has_submission_link = False
@@ -31,7 +35,7 @@ def index(request):
             if e.submission_state in has_link: 
                 e.has_submission_link = True
             res.append({'course_code': c.code, 'title':e.title, 'number':e.number, 'submission_state':e.submission_state, 'has_submission_link':e.has_submission_link})
-    return render_to_response('index.html',{'has_course_link':has_course_link, 'exercises':res}, context)
+    return render_to_response('index.html',{'has_course_link':has_course_link, 'exercises':res, 'courses': courses,}, context)
 
 @login_required
 def student_redir(request):
@@ -42,7 +46,10 @@ def course(request, course_code):
 
     context = RequestContext(request)
     course = Course.objects.get(code=course_code)
-    course.group = course.get_group(request.proxyUser)
+    try: 
+        course.group_name = course.get_group(request.proxyUser).name
+    except:
+        course.group_name = None
     exercises = course.exercises
     for e in exercises:
         e.submission_state = e.submission_state(request.proxyUser)
@@ -65,9 +72,9 @@ def exercise(request, course_code, exercise_number):
     context = RequestContext(request)
     course = Course.objects.get(code=course_code)
     try:
-        course.group = course.get_group(request.proxyUser) 
+        course.group = course.get_group(request.proxyUser).name
     except:
-        course.group = False
+        course.group = None
     exercise = Exercise.objects.get(course=course,number=exercise_number)
     exercise.submission_code = exercise.submission_code(request.proxyUser)
 
@@ -122,12 +129,15 @@ def grading_list(request, course_code, exercise_number=None, team_id=None):
         date_modified = s.date_modified
         grade = s.grade
         group = Course.objects.get(code=course_code).get_group(s.student)
+        group_name = group.name
+        group_pk = group.pk
         res.append({
             'exercise_number': exercise_number,
             'username': username,
             'date_modified': date_modified,
             'grade': grade,
-            'group': group,
+            'group_name': group_name,
+            'group_pk': group_pk,
         })
     filtering = request.GET.get('filtering')
     context = RequestContext(request)
