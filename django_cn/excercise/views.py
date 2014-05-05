@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import login, logout
 from django.contrib.auth import authenticate, login
 from django.conf import settings
+from excercise.forms import SubmissionForm
 
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)
@@ -119,13 +120,17 @@ def examiner_index(request):
 
 @login_required
 @user_passes_test(is_examiner)
-def grading_list(request, course_code, exercise_number=None, team_id=None):
+def grading_list(request, course_code, exercise_number=None, group_id=None):
     
     submissions = Submission.objects.filter(state='S').select_related()
+    if exercise_number:
+        submissions = submissions.filter(exercise__number = exercise_number)
     res = []
     for s in submissions:
         exercise_number = s.exercise.number
+        exercise_id = s.exercise.pk
         username = s.student.username
+        user_id = s.student.pk
         date_modified = s.date_modified
         grade = s.grade
         group = Course.objects.get(code=course_code).get_group(s.student)
@@ -133,7 +138,9 @@ def grading_list(request, course_code, exercise_number=None, team_id=None):
         group_pk = group.pk
         res.append({
             'exercise_number': exercise_number,
+            'exercise_id': exercise_id,
             'username': username,
+            'user_id': user_id,
             'date_modified': date_modified,
             'grade': grade,
             'group_name': group_name,
@@ -143,7 +150,6 @@ def grading_list(request, course_code, exercise_number=None, team_id=None):
     context = RequestContext(request)
     my_dict = { 'course_code': course_code,
                 'exercise_number': exercise_number,
-                'team_id': team_id,
                 'filtering': filtering,
                 'res': res,
               }
@@ -151,9 +157,22 @@ def grading_list(request, course_code, exercise_number=None, team_id=None):
 
 @login_required
 @user_passes_test(is_examiner)
-def answer(request, course_code, exercise_number, team_id, user_id):
-    
-    context = RequestContext(request)
+def answer(request, exercise_id, user_id):
 
-    return render_to_response('examiner/exercise.html', context)
+    context = RequestContext(request)
+    exercise = Exercise.objects.get(pk=exercise_id)
+    submission = Submission.objects.get(exercise__pk=exercise_id, student__pk=user_id)
+    if request.method == 'POST':
+        form = SubmissionForm(request.POST, instance=submission)
+        if form.is_valid():
+            form.save()
+            return redirect('examiner_index')
+    else:
+        form = SubmissionForm(instance=submission)
+    my_dict = {
+        'exercise': exercise,
+        'submission': submission,
+        'form': form,
+    }
+    return render_to_response('examiner/exercise.html', my_dict , context)
 

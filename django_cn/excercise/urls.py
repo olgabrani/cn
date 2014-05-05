@@ -11,6 +11,6 @@ urlpatterns = patterns('',
         url(r'^examiner/$', views.examiner_index, name='examiner_index'),
         url(r'^examiner/(?P<course_code>\w+)/$', views.grading_list, name='grading_list'),
         url(r'^examiner/(?P<course_code>\w+)/(?P<exercise_number>\d+)/?$', views.grading_list, name='grading_list'),
-        url(r'^examiner/(?P<course_code>\w+)/(?P<exercise_number>\d+)/(?P<team_id>\d+)/?$', views.grading_list, name='grading_list'),
-        url(r'^examiner/(?P<course_code>\w+)/(?P<exercise_number>\d+)/(?P<team_id>\d+)/(?P<user_id>\d+)/?$', views.answer, name='answer'),
+        url(r'^examiner/(?P<course_code>\w+)/(?P<exercise_number>\d+)/(?P<group_id>\d+)/?$', views.grading_list, name='grading_list'),
+        url(r'^answer/(?P<exercise_id>\d+)/(?P<user_id>\d+)/?$', views.answer, name='answer'),
     )

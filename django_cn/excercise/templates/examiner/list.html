@@ -31,7 +31,7 @@
             <td>{{s.date_modified}}</td>
             <td><input type="text" class="grade" value="{{s.grade}}"></td>
             <td>Download</td>
-            <td>View</td>
+            <td><a href="{% url 'answer' s.exercise_id s.user_id %}">View</a></td>
         </tr>
     {% endfor  %}
            </tbody>

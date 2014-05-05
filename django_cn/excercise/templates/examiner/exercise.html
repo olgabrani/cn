@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block main %}
-gia eksetastes
+gia eksetastes{{my_dict.submission}}
  <section class="title">
                 <h4>{{ course.name }}<br> <span><strong>Oμάδα 1</strong> Τρίτη 10.30-12.45 </span></h4>
                 <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title}}</h3>
@@ -29,6 +29,13 @@ gia eksetastes
                     <p class="submit">
                         <button>Προσωρινή Αποθήκευση </button>
                         <button type="submit" class="button success"data-reveal-id="unanswered" data-reveal>Υποβολή</button>
+                    </p>
+                </form>
+                <form method="post" action="">{% csrf_token %}
+                    <p class="panel grade-div">
+                        <label for="">Βαθμός</label>
+                        {{form.grade}}
+                        <button type="submit" class="button success small">OK</button>
                     </p>
                 </form>
             </section>
