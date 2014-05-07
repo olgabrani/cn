@@ -1,186 +1,49 @@
 {% extends 'base.html' %}
 
 {% block main %}
+{% for c in courses %}
 <section class="title">
-    <h6>Ακαδημαϊκό έτος: 2009-2010</h6>
-    <h4>Δίκτυα Υπολογιστών</h4>
+    <h6>Ακαδημαϊκό έτος: {{c.school_year}}</h6>
+    <h4>{{c.name}}</h4>
 </section>
 <table class="default">
     <tr>
-        <th>Άσκ.</th>
-        <th>Ομάδα 1</th>
-        <th>Ομάδα 2</th>
-        <th>Ομάδα 3</th>
-        <th>Ομάδα 4</th>
-        <th>Ομάδα 5</th>
-        <th>Ομάδα 6</th>
+        <th>Exercise</th>
+        {% for g in c.groups %}
+            <th>{{g.name}}</th>
+        {% endfor %}
         <th>Συνολικά</th>
-        <th>PDFs</th>
     </tr>
-    <tr>
-        <td>1</td>
-        <td>
-            <a href="{% url 'grading_list' 'DY2014' %}" class="correctable">10 αδιόρθωτες</a>
-            <a href="{% url 'grading_list' 'DY2014' 1 %}" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="{% url 'grading_list' 'DY2014' 1 1 %}" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="{% url 'grading_list' 'DY2014' 1 1 %}?filtering=all">10 αδιόρθωτες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">50 αδιόρθωτες</a>
-            <a href="" class="corrected"> 25 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="pdf questions" title="Η εκφώνηση της άσκησης">&nbsp;</a>
-            <a href="" class="pdf answers" title="Προτεινόμενες απαντήσεις">&nbsp;</a>
-        </td>
-    </tr>
-    <tr>
-        <td>2</td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">50 αδιόρθωτες</a>
-            <a href="" class="corrected"> 25 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="pdf questions" title="Η εκφώνηση της άσκησης">&nbsp;</a>
-            <a href="" class="pdf answers" title="Προτεινόμενες απαντήσεις">&nbsp;</a>
-        </td>
-    </tr>
-    <tr>
-        <td>3</td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">50 αδιόρθωτες</a>
-            <a href="" class="corrected"> 25 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="pdf questions" title="Η εκφώνηση της άσκησης">&nbsp;</a>
-            <a href="" class="pdf answers" title="Προτεινόμενες απαντήσεις">&nbsp;</a>
-        </td>
-    </tr>
-    <tr>
-        <td>4</td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">50 αδιόρθωτες</a>
-            <a href="" class="corrected"> 25 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="pdf questions" title="Η εκφώνηση της άσκησης">&nbsp;</a>
-            <a href="" class="pdf answers" title="Προτεινόμενες απαντήσεις">&nbsp;</a>
-        </td>
-    </tr>
+    {% for e in exercises %}
+        {% if e.course_code == c.code %}
+        <tr>
+            <td>{{e.number}}</td>
+            {% for g in c.groups %}
+                <td>
+                    <a href="{% url 'grading_list' e.course_code e.number g.pk %}">αδιόρθωτες</a>
+                    <a href="{% url 'grading_list' e.course_code e.number g.pk %}?filtering=corrected">διορθωμένες</a>
+                </td>
+            {% endfor %}
+            <td><a href="{% url 'grading_list' e.course_code e.number %}">αδιόρθωτες</a>
+            <a href="{% url 'grading_list' e.course_code e.number %}?filtering=corrected">διορθωμένες</a></td>
+        </tr>
+        {% endif %}
+    {% endfor %}
     <tr>
         <td>Όλες</td>
+        {% for g in c.groups %}
         <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
+            <a href="{% url 'grading_list' c.code 0 g.pk %}">αδιόρθωτες</a>
+            <a href="{% url 'grading_list' c.code 0 g.pk %}?filtering=corrected">διορθωμένες</a>
         </td>
+        {% endfor %}
         <td>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
+            <a href="{% url 'grading_list' c.code %}">αδιόρθωτες</a>
+            <a href="{% url 'grading_list' c.code %}?filtering=corrected">διοθωμένες</a>
         </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">10 αδιόρθωτες</a>
-            <a href="" class="corrected"> 5 διορθωμένες</a>
-        </td>
-        <td>
-            <a href="" class="correctable">50 αδιόρθωτες</a>
-            <a href="" class="corrected"> 25 διορθωμένες</a>
-        </td>
-        <td>
-            &nbsp;
-        </td>
+
     </tr>
 </table>
+{% endfor %}
 {% endblock main %}
 

@@ -115,8 +115,15 @@ def custom_logout(request):
 def examiner_index(request):
     
     context = RequestContext(request)
+    courses = Course.objects.all().select_related()
+    res = []
+    for c in courses:
+        c.groups = c.get_groups
+        for e in c.exercises:
+            res.append({'course_code': c.code, 'title':e.title, 'number':e.number, })
+    return render_to_response('examiner/index.html',{ 'exercises':res, 'courses': courses,}, context)
 
-    return render_to_response('examiner/index.html', context)
+
 
 @login_required
 @user_passes_test(is_examiner)

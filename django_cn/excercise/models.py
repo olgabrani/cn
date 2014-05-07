@@ -36,6 +36,18 @@ class Course(models.Model):
 
         return group 
 
+    @property
+    def get_groups(self):
+        
+        try: 
+            courseid = MdlCourse.objects.using('users').get(shortname=self.code).pk
+        except:
+            courseid = None
+
+        groups = MdlGroups.objects.using('users').filter(courseid=courseid)
+        return groups
+
+
 
     def __unicode__(self):
         return self.name + ' ( Code:' + self.code +' )'
