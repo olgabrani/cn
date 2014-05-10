@@ -4,6 +4,31 @@ from django.db import models
 from datetime import datetime, date
 from django.contrib.auth.models import User
 
+def cnt_sub(course_code=None, exercise_number=None, group_id=None, filtering=None):
+    if filtering == 'corrected':
+        submissions = Submission.objects.filter(state='C')
+    elif filtering == 'all':
+        submissions = Submission.objects.all()
+    else: 
+        submissions = Submission.objects.filter(state='S')
+    if course_code:
+        submissions = submissions.filter(exercise__course__code=course_code)
+    if  exercise_number and int(exercise_number) > 0:
+        submissions = submissions.filter(exercise__number=exercise_number)
+    if group_id:
+        groupmembers = MdlGroupsMembers.objects.using('users').filter(group_id=group_id)
+        mdlusers_ids = []
+        for g in groupmembers:
+            mdlusers_ids.append(g.userid)
+        mdlusers = MdlUsers.objects.using('users').filter(pk__in = mdlusers_ids)
+        usernames = []
+        for m in mdlusers:
+            usernames.append(m.username)
+        submissions = submissions.filter(student__username__in=usernames)
+    print submissions.count(), '!!!!!!'
+    return submissions
+
+
 class Course(models.Model):
     name = models.CharField(max_length=128)
     code = models.CharField(max_length=64)
@@ -47,7 +72,20 @@ class Course(models.Model):
         groups = MdlGroups.objects.using('users').filter(courseid=courseid)
         return groups
 
+    def cnt_submissions(self,state=None):
+        submissions = Submission.objects.filter(exercise__course=self)
+        if state: 
+            submissions = Submission.objects.filter(exercise__course=self, state=state)
+        return submissions.count()
 
+    @property
+    def cnt_subm_corrected(self):
+        return self.cnt_submissions(state='C')
+
+    @property
+    def cnt_subm_submitted(self):
+        return self.cnt_submissions(state='S')
+    
 
     def __unicode__(self):
         return self.name + ' ( Code:' + self.code +' )'
@@ -87,6 +125,21 @@ class Exercise(models.Model):
         except:
             submission = 'Ανοιχτή'
         return submission    
+
+    def cnt_submissions(self, group_id=1, state=None):
+        cnt = 0
+        submissions = Submission.objects.filter(exercise = self)
+        if state:
+            submissions = submissions.filter(state=state, exercise=self)
+        if group_id:
+            #submissions = submissions.filter(group_id=group_id)
+            for e in submissions:
+                print e.group_id
+        if submissions:
+            cnt = submissions.count()
+
+        return cnt
+
 
     def __unicode__(self):
         return self.title
@@ -131,6 +184,12 @@ class Submission(models.Model):
     date_modified = models.DateField(auto_now=True)
     state = models.CharField(max_length=1, choices = SUBMISSION_STATE, default='I')
     grade = models.CharField(max_length=2, null=True, blank=True)
+
+    @property
+    def group_id(self):
+        userid = MdlUser.objects.using('users').get(username=self.student.username).pk
+        group_id = MdlGroupsMembers.objects.using('users').get(userid=userid).pk
+        return group_id
 
     def __unicode__(self):
         return self.student.username+ 'Grade: '+self.grade
@@ -190,7 +249,7 @@ class MdlEnrol(models.Model):
 class MdlGroups(models.Model):
     courseid = models.BigIntegerField()
     name = models.CharField(max_length=254)
-    
+   
     class Meta:
         managed = False
         db_table = 'mdl_groups'

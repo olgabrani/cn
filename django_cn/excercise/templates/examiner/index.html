@@ -8,7 +8,7 @@
 </section>
 <table class="default">
     <tr>
-        <th>Exercise</th>
+        <th>'Ασκ.</th>
         {% for g in c.groups %}
             <th>{{g.name}}</th>
         {% endfor %}
@@ -17,29 +17,40 @@
     {% for e in exercises %}
         {% if e.course_code == c.code %}
         <tr>
-            <td>{{e.number}}</td>
+            <th>{{e.number}}</th>
             {% for g in c.groups %}
                 <td>
-                    <a href="{% url 'grading_list' e.course_code e.number g.pk %}">αδιόρθωτες</a>
-                    <a href="{% url 'grading_list' e.course_code e.number g.pk %}?filtering=corrected">διορθωμένες</a>
+                    <a href="{% url 'grading_list' e.course_code e.number g.pk %}" class="correctable">αδιόρθωτες</a>
+                    <a href="{% url 'grading_list' e.course_code e.number g.pk %}?filtering=corrected" class="corrected">διορθωμένες</a>
                 </td>
             {% endfor %}
-            <td><a href="{% url 'grading_list' e.course_code e.number %}">αδιόρθωτες</a>
-            <a href="{% url 'grading_list' e.course_code e.number %}?filtering=corrected">διορθωμένες</a></td>
+            <td>
+                {% if e.cnt_s > 0 %}
+                <a href="{% url 'grading_list' e.course_code e.number %}" class="correctable">{{e.cnt_s}} αδιόρθωτες</a>
+                {% endif %}
+                {% if e.cnt_c > 0 %}
+                <a href="{% url 'grading_list' e.course_code e.number %}?filtering=corrected" class="corrected">{{e.cnt_c}} διορθωμένες</a>
+                {% endif %}
+            </td>
         </tr>
         {% endif %}
     {% endfor %}
     <tr>
-        <td>Όλες</td>
+        <th>Όλες</th>
         {% for g in c.groups %}
         <td>
-            <a href="{% url 'grading_list' c.code 0 g.pk %}">αδιόρθωτες</a>
-            <a href="{% url 'grading_list' c.code 0 g.pk %}?filtering=corrected">διορθωμένες</a>
+            {{g.cnt_submissions}}
+            <a href="{% url 'grading_list' c.code 0 g.pk %}" class="correctable">αδιόρθωτες</a>
+            <a href="{% url 'grading_list' c.code 0 g.pk %}?filtering=corrected" class="corrected">διορθωμένες</a>
         </td>
         {% endfor %}
         <td>
-            <a href="{% url 'grading_list' c.code %}">αδιόρθωτες</a>
-            <a href="{% url 'grading_list' c.code %}?filtering=corrected">διοθωμένες</a>
+            {% if c.cnt_subm_submitted >  0 %}
+            <a href="{% url 'grading_list' c.code %}" class="correctable">{{c.cnt_subm_submitted}} αδιόρθωτες</a>
+            {% endif %}
+            {% if c.cnt_subm_corrected %}
+            <a href="{% url 'grading_list' c.code %}?filtering=corrected" class="corrected">{{c.cnt_subm_corrected}} διοθωμένες</a>
+            {% endif %}
         </td>
 
     </tr>

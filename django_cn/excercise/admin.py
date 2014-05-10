@@ -11,7 +11,10 @@ class ExerciseAdmin(admin.ModelAdmin):
     inlines = [
         QuestionInline
     ]
+class SubmissionAdmin(admin.ModelAdmin):
+    list_display = ('exercise', 'student','state', 'grade')
+
 
 admin.site.register(Course)
-admin.site.register(Submission)
+admin.site.register(Submission, SubmissionAdmin)
 admin.site.register(Exercise, ExerciseAdmin)

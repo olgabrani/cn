@@ -9,12 +9,12 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import login, logout
 from django.contrib.auth import authenticate, login
 from django.conf import settings
-from excercise.forms import SubmissionForm
+from excercise.forms import SubmissionForm, SubmissionFormSet
+from excercise.models import cnt_sub
 
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)
     return user.groups.filter(name='examiner')
-
 
 @login_required
 def index(request):
@@ -120,7 +120,9 @@ def examiner_index(request):
     for c in courses:
         c.groups = c.get_groups
         for e in c.exercises:
-            res.append({'course_code': c.code, 'title':e.title, 'number':e.number, })
+            e.cnt_submitted = e.cnt_submissions(state='S')
+            e.cnt_corrected = e.cnt_submissions(state='C')
+            res.append({'course_code': c.code, 'title':e.title, 'number':e.number,'cnt_s':e.cnt_submitted, 'cnt_c':e.cnt_corrected })
     return render_to_response('examiner/index.html',{ 'exercises':res, 'courses': courses,}, context)
 
 
@@ -128,8 +130,9 @@ def examiner_index(request):
 @login_required
 @user_passes_test(is_examiner)
 def grading_list(request, course_code, exercise_number=None, group_id=None):
-    
+    cnt_sub(course_code, exercise_number, group_id, filtering='submitted') 
     submissions = Submission.objects.filter(state='S').select_related()
+    submissions1 = Submission.objects.all()
     if exercise_number:
         submissions = submissions.filter(exercise__number = exercise_number)
     res = []
@@ -141,8 +144,12 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
         date_modified = s.date_modified
         grade = s.grade
         group = Course.objects.get(code=course_code).get_group(s.student)
-        group_name = group.name
-        group_pk = group.pk
+        if group:
+            group_name = group.name
+            group_pk = group.pk
+        else:
+            group_name = None
+            group_pk = None
         res.append({
             'exercise_number': exercise_number,
             'exercise_id': exercise_id,
@@ -154,11 +161,13 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
             'group_pk': group_pk,
         })
     filtering = request.GET.get('filtering')
+    formset = 'wip'
     context = RequestContext(request)
     my_dict = { 'course_code': course_code,
                 'exercise_number': exercise_number,
                 'filtering': filtering,
                 'res': res,
+                'formset':formset,
               }
     return render_to_response('examiner/list.html', my_dict, context)
 
