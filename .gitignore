@@ -10,35 +10,13 @@ build/
 include/
 *.pt.py
 *.installed.cfg
-*.sqlite
-.Python
-.idea
+*.sqlite3
 .DS_Store
-selenium-server-standalone-2.0b2.jar
-.project
-.pydevproject
-.settings/
-settings.d/*-local.conf
-*.egg-info
 _build
 .coverage
 
-# pithos temp files
-pithos/data
-
-# version modules created automatically from setup.py
-*/synnefo/versions/*.py
-*/pithos/*/version.py
-!*/synnefo/versions/__init__.py
-snf-astakos-app/astakos/version.py
-snf-tools/synnefo_tools/version.py
-snf-quotaholder-app/quotaholder_django/version.py
-*.iml
-*.graffle
-snf-stats-app/synnefo_stats/version.py
-astakosclient/astakosclient/version.py
-snf-django-lib/snf_django/version.py
-snf-branding/synnefo_branding/version.py
-snf-deploy/snfdeploy/version.py
 *.egg
 *.tar.gz
+django_cn/local.py
+django_cn/documents/*
+django_cn/uploads/*
