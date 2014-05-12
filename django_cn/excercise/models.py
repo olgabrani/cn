@@ -4,7 +4,7 @@ from django.db import models
 from datetime import datetime, date
 from django.contrib.auth.models import User
 
-def cnt_sub(course_code=None, exercise_number=None, group_id=None, filtering=None):
+def submission_list(course_code=None, exercise_number=None, group_id=None, filtering=None):
     if filtering == 'corrected':
         submissions = Submission.objects.filter(state='C')
     elif filtering == 'all':
@@ -16,16 +16,15 @@ def cnt_sub(course_code=None, exercise_number=None, group_id=None, filtering=Non
     if  exercise_number and int(exercise_number) > 0:
         submissions = submissions.filter(exercise__number=exercise_number)
     if group_id:
-        groupmembers = MdlGroupsMembers.objects.using('users').filter(group_id=group_id)
+        groupmembers = MdlGroupsMembers.objects.using('users').filter(groupid=group_id)
         mdlusers_ids = []
         for g in groupmembers:
             mdlusers_ids.append(g.userid)
-        mdlusers = MdlUsers.objects.using('users').filter(pk__in = mdlusers_ids)
+        mdlusers = MdlUser.objects.using('users').filter(pk__in = mdlusers_ids)
         usernames = []
         for m in mdlusers:
             usernames.append(m.username)
         submissions = submissions.filter(student__username__in=usernames)
-    print submissions.count(), '!!!!!!'
     return submissions
 
 
@@ -72,19 +71,20 @@ class Course(models.Model):
         groups = MdlGroups.objects.using('users').filter(courseid=courseid)
         return groups
 
-    def cnt_submissions(self,state=None):
-        submissions = Submission.objects.filter(exercise__course=self)
-        if state: 
-            submissions = Submission.objects.filter(exercise__course=self, state=state)
-        return submissions.count()
+    def cnt_submissions(self,filtering=None):
+        cnt_submissions = 0
+        submissions = submission_list(self.code, None, None, filtering)
+        if submissions:
+            cnt_submissions = submissions.count()
+        return cnt_submissions
 
     @property
     def cnt_subm_corrected(self):
-        return self.cnt_submissions(state='C')
+        return self.cnt_submissions(filtering='corrected')
 
     @property
     def cnt_subm_submitted(self):
-        return self.cnt_submissions(state='S')
+        return self.cnt_submissions()
     
 
     def __unicode__(self):
@@ -126,18 +126,12 @@ class Exercise(models.Model):
             submission = 'Ανοιχτή'
         return submission    
 
-    def cnt_submissions(self, group_id=1, state=None):
+    def cnt_submissions(self, group_id=None, filtering=None):
         cnt = 0
-        submissions = Submission.objects.filter(exercise = self)
-        if state:
-            submissions = submissions.filter(state=state, exercise=self)
-        if group_id:
-            #submissions = submissions.filter(group_id=group_id)
-            for e in submissions:
-                print e.group_id
+        code = self.course_code
+        submissions = submission_list(code, self.number, group_id, filtering)
         if submissions:
             cnt = submissions.count()
-
         return cnt
 
 
@@ -277,7 +271,6 @@ class ProxyUser(User):
             enrolments = MdlUserEnrolments.objects.using('users').filter(userid=self.is_moodle_user.pk)
             for e in enrolments:
                 course_codes.append(e.course_code)
-            print course_codes
             enrolled_courses = Course.objects.filter(code__in=course_codes)
             for e in enrolled_courses:
                 e.group = e.get_group(self)

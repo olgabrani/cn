@@ -8,9 +8,27 @@
         <link rel="stylesheet" href="{% static 'css/app.css' %}"/>
     </head>
     <body>
-        {% include 'header.html' %}
+        {% block header%}
+        <header>
+            <div class="row">
+                <h1 class="small-5 column">
+                    <a href="{% url 'index' %}" title="">
+                        <img src="{% static 'images/logo_ntua.png' %}" alt="">
+                    </a>
+                    <span>Εργαστήριο Δικτύων Υπολογιστών</span>
+                </h1>
+                <div class="small-7 column rt">
+                    {% block header_user %}
+                        {% if user.is_authenticated %}
+                            <p>Welcome <strong>{{ user.username }}</strong> <a href="{% url 'excercise.views.custom_logout' %}">(έξοδος)</a></p>
+                        {% endif %}
+                    {% endblock header_user %}
+                    {% block menu %}{% endblock menu %}
+                </div>
+            </div>
+        </header>
+        {% endblock header %}
         <div class="row main">
-           
                 {% block main %}
                 {% endblock main %}
         </div>

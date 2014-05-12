@@ -1,13 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'examiner/examiner_base.html' %}
 {% block main %}
 <section class="title">
 <h6>Ακαδημαϊκό έτος: 2009-2010</h6>
 <h4>Δίκτυα Υπολογιστών</h4>
 </section>
-{{team_id}}<br>
-{{course_code}}<br>
-{{exercise_number}}<br>
-{{filtering}}
 <table class="default sortable">
     <thead>
         <tr>
@@ -34,9 +30,7 @@
             <td><a href="{% url 'answer' s.exercise_id s.user_id %}">View</a></td>
         </tr>
     {% endfor  %}
-    {{formset}}
-    {% for f in formset %}{{f.grade}}{% endfor %}
-           </tbody>
+    </tbody>
 </table>
 <p class="submit">
 <button type="submit" class="button success" style="float:right;">Αποθήκευη βαθμών</button>

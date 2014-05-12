@@ -10,7 +10,7 @@ from django.contrib.auth.views import login, logout
 from django.contrib.auth import authenticate, login
 from django.conf import settings
 from excercise.forms import SubmissionForm, SubmissionFormSet
-from excercise.models import cnt_sub
+from excercise.models import submission_list
 
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)
@@ -18,8 +18,6 @@ def is_examiner(user):
 
 @login_required
 def index(request):
-    # Request the context of the request.
-    # The context contains information such as the client's machine details, for example.
     context = RequestContext(request)
     has_course_link = True
     courses = Course.objects.all().select_related()
@@ -119,10 +117,21 @@ def examiner_index(request):
     res = []
     for c in courses:
         c.groups = c.get_groups
-        for e in c.exercises:
-            e.cnt_submitted = e.cnt_submissions(state='S')
-            e.cnt_corrected = e.cnt_submissions(state='C')
-            res.append({'course_code': c.code, 'title':e.title, 'number':e.number,'cnt_s':e.cnt_submitted, 'cnt_c':e.cnt_corrected })
+        for g in c.groups:
+            group_id = int(g.id)
+            g.cnt_s = submission_list(c.code, None, group_id).count()
+            g.cnt_c = submission_list(c.code, None, group_id, "corrected").count()
+        for e in c.exercises: 
+            e.group_list = []
+            e.groups = c.groups
+            for g in e.groups:
+                group_id = int(g.id)
+                cnt_s = submission_list(c.code, e.number, group_id).count()
+                cnt_c = submission_list(c.code, e.number, group_id, "corrected").count()
+                e.group_list.append({'group_id':group_id, 'cnt_c':cnt_c, 'cnt_s':cnt_s})
+            e.cnt_s = e.cnt_submissions()
+            e.cnt_c = e.cnt_submissions(filtering='corrected')
+            res.append({'course_code': c.code, 'title':e.title, 'number':e.number,'cnt_s':e.cnt_s, 'cnt_c':e.cnt_c, 'groups': e.groups, 'group_list': e.group_list })
     return render_to_response('examiner/index.html',{ 'exercises':res, 'courses': courses,}, context)
 
 
@@ -130,11 +139,12 @@ def examiner_index(request):
 @login_required
 @user_passes_test(is_examiner)
 def grading_list(request, course_code, exercise_number=None, group_id=None):
-    cnt_sub(course_code, exercise_number, group_id, filtering='submitted') 
-    submissions = Submission.objects.filter(state='S').select_related()
-    submissions1 = Submission.objects.all()
-    if exercise_number:
-        submissions = submissions.filter(exercise__number = exercise_number)
+    
+    filtering = request.GET.get('filtering', None)
+    submissions = submission_list(course_code, exercise_number, group_id, filtering)
+    formset = SubmissionFormSet(queryset=submissions)
+    for form in formset:
+        print form
     res = []
     for s in submissions:
         exercise_number = s.exercise.number
@@ -160,8 +170,6 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
             'group_name': group_name,
             'group_pk': group_pk,
         })
-    filtering = request.GET.get('filtering')
-    formset = 'wip'
     context = RequestContext(request)
     my_dict = { 'course_code': course_code,
                 'exercise_number': exercise_number,
