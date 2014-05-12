@@ -175,7 +175,8 @@ class Submission(models.Model):
 
     exercise = models.ForeignKey(Exercise)
     student = models.ForeignKey(User)
-    date_modified = models.DateField(auto_now=True)
+    datetime_submitted = models.DateTimeField(null=True, blank=True)
+    datetime_corrected = models.DateTimeField(null=True, blank=True)
     state = models.CharField(max_length=1, choices = SUBMISSION_STATE, default='I')
     grade = models.CharField(max_length=2, null=True, blank=True)
 

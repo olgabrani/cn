@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate, login
 from django.conf import settings
 from excercise.forms import SubmissionForm, SubmissionFormSet
 from excercise.models import submission_list
+import datetime
 
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)
@@ -151,7 +152,6 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
         exercise_id = s.exercise.pk
         username = s.student.username
         user_id = s.student.pk
-        date_modified = s.date_modified
         grade = s.grade
         group = Course.objects.get(code=course_code).get_group(s.student)
         if group:
@@ -165,7 +165,6 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
             'exercise_id': exercise_id,
             'username': username,
             'user_id': user_id,
-            'date_modified': date_modified,
             'grade': grade,
             'group_name': group_name,
             'group_pk': group_pk,
@@ -189,7 +188,14 @@ def answer(request, exercise_id, user_id):
     if request.method == 'POST':
         form = SubmissionForm(request.POST, instance=submission)
         if form.is_valid():
-            form.save()
+            new_submission = form.save(commit=False)
+            grade = request.POST.get('grade', None)
+            if grade:
+                new_submission.datetime_corrected = datetime.datetime.now()
+                new_submission.state = 'C'
+            else:
+                new_submission.state = 'S'
+            new_submission.save()
             return redirect('examiner_index')
     else:
         form = SubmissionForm(instance=submission)
