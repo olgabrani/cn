@@ -40,13 +40,12 @@
                         {% endif %}
                     </div>
                     {% endfor %}
-                    {{exercise.submission_code}}
                     <input type="hidden" value="{{exercise.submission_code}}" name="submission_code" />
-{% if exercise.submission_code == 'O' or exercise.submission_code == 'I' %}            
-                    <p class="submit">
-                        <button>Προσωρινή Αποθήκευση </button>
-                        <button type="submit" class="button success">Υποβολή</button>
-                    </p>
+                    {% if exercise.submission_code == 'O' or exercise.submission_code == 'I' %}            
+                        <p class="submit">
+                            <button type="submit" class="save" name="save">Προσωρινή Αποθήκευση </button>
+                            <button type="submit" class="button success" name="submit">Υποβολή</button>
+                        </p>
                     {% endif %}
                 </form>
             </section>

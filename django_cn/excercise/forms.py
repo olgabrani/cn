@@ -10,3 +10,9 @@ class SubmissionForm(ModelForm):
         fields = ['grade']
 
 SubmissionFormSet = modelformset_factory(Submission, form=SubmissionForm, extra=0)
+
+class StudentSubmissionForm(ModelForm):
+    
+    class Meta:
+        model = Submission
+        fields = []

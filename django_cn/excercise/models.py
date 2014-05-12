@@ -187,7 +187,7 @@ class Submission(models.Model):
         return group_id
 
     def __unicode__(self):
-        return self.student.username+ 'Grade: '+self.grade
+        return self.student.username
 
 
 class MdlUser(models.Model):

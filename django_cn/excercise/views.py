@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import login, logout
 from django.contrib.auth import authenticate, login
 from django.conf import settings
-from excercise.forms import SubmissionForm, SubmissionFormSet
+from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm
 from excercise.models import submission_list
 import datetime
 
@@ -65,10 +65,6 @@ def course(request, course_code):
 @login_required
 def exercise(request, course_code, exercise_number):
 
-    if request.method == 'POST':
-        submission_code = request.POST.get('submission_code', 'O')
-        print submission_code
-        return redirect('index')
     context = RequestContext(request)
     course = Course.objects.get(code=course_code)
     try:
@@ -76,6 +72,26 @@ def exercise(request, course_code, exercise_number):
     except:
         course.group = None
     exercise = Exercise.objects.get(course=course,number=exercise_number)
+    student = request.user
+    try:
+        submission = Submission.objects.get(exercise=exercise,student=student)
+        if request.method == 'POST':
+            form = StudentSubmissionForm(request.POST, instance=submission)
+            new_submission = form.save(commit=False)
+    except:
+        if request.method == 'POST':
+            form = StudentSubmissionForm(request.POST)
+            new_submission = form.save(commit=False)
+            new_submission.student = student
+            new_submission.exercise = exercise
+    if request.method == 'POST':
+        if 'save' in request.POST.keys():
+            new_submission.state = 'I'
+        else:
+            new_submission.state = 'S'
+        new_submission.save()
+        return redirect('index')
+    
     exercise.submission_code = exercise.submission_code(request.proxyUser)
 
 
