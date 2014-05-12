@@ -1,11 +1,5 @@
 {% extends 'base.html' %}
-{% block menu %}
-    {% url 'examiner_index' as home_url %}
-    <p>
-        <a href="{% url 'examiner_index' %}" {% if request.get_full_path == home_url %}class="current"{% endif %}>Μαθήματα</a>
-        | 
-        <a href="" title="">Βαθμολογίες</a>
-    </p>
-{% endblock menu %}
-
+{% block index_url %}
+    <a href="{% url 'examiner_index' %}">
+{% endblock index_url %}
 

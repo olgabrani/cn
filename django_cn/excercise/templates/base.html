@@ -12,7 +12,9 @@
         <header>
             <div class="row">
                 <h1 class="small-5 column">
+                    {% block index_url %}
                     <a href="{% url 'index' %}" title="">
+                    {% endblock index_url %}
                         <img src="{% static 'images/logo_ntua.png' %}" alt="">
                     </a>
                     <span>Εργαστήριο Δικτύων Υπολογιστών</span>
