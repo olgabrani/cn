@@ -89,6 +89,7 @@ def exercise(request, course_code, exercise_number):
             new_submission.state = 'I'
         else:
             new_submission.state = 'S'
+            new_submission.datetime_submitted = datetime.datetime.now()
         new_submission.save()
         return redirect('index')
     
@@ -160,9 +161,13 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
     filtering = request.GET.get('filtering', None)
     submissions = submission_list(course_code, exercise_number, group_id, filtering)
     formset = SubmissionFormSet(queryset=submissions)
-    for form in formset:
-        print form
     res = []
+    forms = []
+    for f in formset:
+        forms.append({
+            'form': f
+        })
+    i = 0
     for s in submissions:
         exercise_number = s.exercise.number
         exercise_id = s.exercise.pk
@@ -184,7 +189,9 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
             'grade': grade,
             'group_name': group_name,
             'group_pk': group_pk,
+            'form': forms[i].get('form', None),
         })
+        i = i+1
     context = RequestContext(request)
     my_dict = { 'course_code': course_code,
                 'exercise_number': exercise_number,
