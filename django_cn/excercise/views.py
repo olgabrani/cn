@@ -160,7 +160,12 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
     
     filtering = request.GET.get('filtering', None)
     submissions = submission_list(course_code, exercise_number, group_id, filtering)
-    formset = SubmissionFormSet(queryset=submissions)
+    if request.method == 'POST':
+        print request.POST
+        formset = SubmissionFormSet(request.POST, queryset=submissions)
+    else:
+        formset = SubmissionFormSet(queryset=submissions)
+    
     res = []
     forms = []
     for f in formset:

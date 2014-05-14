@@ -142,9 +142,10 @@ class Question(models.Model):
     ANSWER_TYPE_CHOICES = (
         ('T', 'Text'),
         ('I', 'Image File'),
-        ('L', 'Link')
+        ('L', 'Link'),
+        ('E', 'Empty')
     )
-
+    #Empty option can be used for theory
     text = models.TextField(null=True, blank=True)
     order = models.CharField(max_length=32)
     suggested_answer = models.TextField(null=True, blank=True)

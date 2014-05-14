@@ -4,7 +4,8 @@
 <h6>Ακαδημαϊκό έτος: 2009-2010</h6>
 <h4>Δίκτυα Υπολογιστών</h4>
 </section>
-<form action="" method="POST">
+<form action="" method="POST">{% csrf_token %}
+ {{ formset.management_form }}
 <table class="default sortable">
     <thead>
         <tr>
@@ -20,6 +21,7 @@
     </thead>
     <tbody>
     {% for s in res %}
+        {{s.form.id}}
         <tr>
             <td><input type="checkbox"></td>
             <td>{{s.exercise_number}}</td>

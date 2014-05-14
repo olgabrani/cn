@@ -1,4 +1,5 @@
 {% extends 'examiner/examiner_base.html' %}
+{% load markdown_deux_tags %}
 
 {% block main %}
 gia eksetastes{{my_dict.submission}}
@@ -11,16 +12,20 @@ gia eksetastes{{my_dict.submission}}
                     <div class="theory">
                         {{ exercise.theory|safe }}
                     </div>
-                    {% for question in exercise.questions %} 
+                    {% for q in exercise.questions %} 
                     <div class="qa">
+                        {% if q.answer_type == 'E' %}
+                            {{ q.text|markdown }}
+                        {% else %}
                         <div class="qa-desc panel">
-                            <p class="num">{{ question.order }}</p>
-                            <p>{{ question.text }}</p>
+                            <strong class="num">{{ q.order }}</strong>
+                            <p>{{ q.text|markdown }}</p>
                         </div>
-                        {% if question.answer_type == "T" %}
-                        <textarea placeholder="{{ question.order }} Απάντηση"></textarea>
-                        {% elif question.answer_type == "I" %}
-                        <label for="file">{{ question.order }} Απάντηση</label>
+                        {% endif %}
+                        {% if q.answer_type == "T" %}
+                        <textarea placeholder="{{ q.order }} Απάντηση"></textarea>
+                        {% elif q.answer_type == "I" %}
+                        <label for="file">{{ q.order }} Απάντηση</label>
                         <input type="file" name="file" id="file" />
                         {% endif %}
                     </div>
