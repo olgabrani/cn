@@ -136,7 +136,7 @@ class Exercise(models.Model):
 
 
     def __unicode__(self):
-        return self.title
+        return '%d: %s' %(self.number, self.title)
 
 class Question(models.Model):
     ANSWER_TYPE_CHOICES = (
