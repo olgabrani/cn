@@ -84,13 +84,15 @@ def exercise(request, course_code, exercise_number):
         submission = Submission.objects.get(exercise=exercise,student=student)
         if request.method == 'POST':
             form = StudentSubmissionForm(request.POST, instance=submission)
-            new_submission = form.save(commit=False)
+            if form.is_valid():
+                new_submission = form.save(commit=False)
     except:
         if request.method == 'POST':
             form = StudentSubmissionForm(request.POST)
-            new_submission = form.save(commit=False)
-            new_submission.student = student
-            new_submission.exercise = exercise
+            if form.is_valid():
+                new_submission = form.save(commit=False)
+                new_submission.student = student
+                new_submission.exercise = exercise
     if request.method == 'POST':
         q_dict = slicedict(request.POST, 'q-')
         for k, v in q_dict.iteritems():

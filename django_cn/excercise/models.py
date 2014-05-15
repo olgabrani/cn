@@ -8,7 +8,7 @@ def submission_list(course_code=None, exercise_number=None, group_id=None, filte
     if filtering == 'corrected':
         submissions = Submission.objects.filter(state='C')
     elif filtering == 'all':
-        submissions = Submission.objects.all()
+        submissions = Submission.objects.exclude(state='I')
     else: 
         submissions = Submission.objects.filter(state='S')
     if course_code:
