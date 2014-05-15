@@ -2,7 +2,7 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission
+from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import user_passes_test
@@ -16,6 +16,9 @@ import datetime
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)
     return user.groups.filter(name='examiner')
+
+def slicedict(d, s):
+    return {k:v for k,v in d.iteritems() if k.startswith(s)}
 
 @login_required
 def index(request):
@@ -67,12 +70,16 @@ def exercise(request, course_code, exercise_number):
 
     context = RequestContext(request)
     course = Course.objects.get(code=course_code)
+   
     try:
         course.group = course.get_group(request.proxyUser).name
     except:
         course.group = None
-    exercise = Exercise.objects.get(course=course,number=exercise_number)
+    
+    exercise = Exercise.objects.select_related('questions').get(course=course,number=exercise_number)
+    questions = exercise.questions
     student = request.user
+    
     try:
         submission = Submission.objects.get(exercise=exercise,student=student)
         if request.method == 'POST':
@@ -85,18 +92,42 @@ def exercise(request, course_code, exercise_number):
             new_submission.student = student
             new_submission.exercise = exercise
     if request.method == 'POST':
+        q_dict = slicedict(request.POST, 'q-')
+        for k, v in q_dict.iteritems():
+            answer = v
+            t = k.split('-',2)
+            question_pk = t[1]
+            student_pk = t[2]
+            obj, created = Answer.objects.get_or_create(question_id= question_pk, student_id= student_pk)
+            obj.answer = answer
+            obj.save()
+
+
         if 'save' in request.POST.keys():
             new_submission.state = 'I'
         else:
             new_submission.state = 'S'
             new_submission.datetime_submitted = datetime.datetime.now()
         new_submission.save()
-        return redirect('index')
-    
+
+    for q in questions:
+        q.field_name = 'q-%d-%d' %(q.pk, student.pk)
+        if q.answer_type == 'T':
+            try:
+                obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+                print obj.answer
+                q.value = obj.answer
+            except:
+                q.value = None
+
     exercise.submission_code = exercise.submission_code(request.proxyUser)
+    my_dict = {'course': course,
+               'exercise': exercise,
+               'questions': questions, 
+    }
 
 
-    return render_to_response('exercise.html',{'course':course, 'exercise':exercise}, context)
+    return render_to_response('exercise.html', my_dict, context)
 
 def custom_login(request):
     context = RequestContext(request)

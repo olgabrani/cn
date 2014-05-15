@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load markdown_deux_tags %}
 
 {% block main %}
     <section class="title">
@@ -21,32 +22,32 @@
         </table>
         <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title}}</h3>
     </section>
-            <section class="qas">
-                <form method="post" action="" >{% csrf_token %}
-                    <div class="theory">
-                        {{ exercise.theory|safe }}
-                    </div>
-                    {% for question in exercise.questions %} 
-                    <div class="qa">
+    <section class="qas">
+        <form method="post" action="" >{% csrf_token %}
+            {% for q in questions %} 
+                <div class="qa">
+                    {% if q.answer_type == "E" %}
+                        {{ q.text|markdown}}
+                    {% else %}
                         <div class="qa-desc panel">
-                            <p class="num">{{ question.order }}</p>
-                            <p>{{ question.text }}</p>
+                            <p class="num">{{ q.order }}</p>
+                            {{ q.text|markdown }}
                         </div>
-                        {% if question.answer_type == "T" %}
-                        <textarea placeholder="{{ question.order }} Απάντηση"></textarea>
-                        {% elif question.answer_type == "I" %}
-                        <label for="file">{{ question.order }} Απάντηση</label>
-                        <input type="file" name="file" id="file" />
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                    <input type="hidden" value="{{exercise.submission_code}}" name="submission_code" />
-                    {% if exercise.submission_code == 'O' or exercise.submission_code == 'I' %}            
-                        <p class="submit">
-                            <button type="submit" class="save" name="save">Προσωρινή Αποθήκευση </button>
-                            <button type="submit" class="button success" name="submit">Υποβολή</button>
-                        </p>
                     {% endif %}
-                </form>
-            </section>
+                    {% if q.answer_type == "T" %}
+                        <textarea placeholder="{{ q.order }} Απάντηση" name="{{q.field_name}}">{{q.value}}</textarea>
+                    {% elif q.answer_type == "I" %}
+                        <label for="file">{{ q.order }} Απάντηση</label>
+                        <input type="file" name="file" id="file" />
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% if exercise.submission_code == 'O' or exercise.submission_code == 'I' %}            
+                <p class="submit">
+                    <button type="submit" class="save" name="save">Προσωρινή Αποθήκευση </button>
+                    <button type="submit" class="button success" name="submit">Υποβολή</button>
+                </p>
+            {% endif %}
+        </form>
+    </section>
 {% endblock main %}
