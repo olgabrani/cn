@@ -31,6 +31,7 @@ def submission_list(course_code=None, exercise_number=None, group_id=None, filte
 class Course(models.Model):
     name = models.CharField(max_length=128)
     code = models.CharField(max_length=64)
+    is_active = models.BooleanField(default=True)
 
     @property
     def school_year(self):
@@ -273,7 +274,7 @@ class ProxyUser(User):
             enrolments = MdlUserEnrolments.objects.using('users').filter(userid=self.is_moodle_user.pk)
             for e in enrolments:
                 course_codes.append(e.course_code)
-            enrolled_courses = Course.objects.filter(code__in=course_codes)
+            enrolled_courses = Course.objects.filter(code__in=course_codes, is_active=True)
             for e in enrolled_courses:
                 e.group = e.get_group(self)
             return enrolled_courses

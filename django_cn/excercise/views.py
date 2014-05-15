@@ -24,7 +24,8 @@ def slicedict(d, s):
 def index(request):
     context = RequestContext(request)
     has_course_link = True
-    courses = Course.objects.all().select_related()
+    courses = Course.objects.filter(is_active=True).select_related()
+    print courses
     res = []
     for c in courses:
         try:
@@ -164,7 +165,7 @@ def custom_logout(request):
 def examiner_index(request):
     
     context = RequestContext(request)
-    courses = Course.objects.all().select_related()
+    courses = Course.objects.filter(is_active=True).select_related()
     res = []
     for c in courses:
         c.groups = c.get_groups

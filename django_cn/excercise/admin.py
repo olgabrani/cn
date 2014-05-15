@@ -14,7 +14,9 @@ class ExerciseAdmin(admin.ModelAdmin):
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('exercise', 'student','state', 'grade')
 
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'is_active')
 
-admin.site.register(Course)
+admin.site.register(Course, CourseAdmin)
 admin.site.register(Submission, SubmissionAdmin)
 admin.site.register(Exercise, ExerciseAdmin)
