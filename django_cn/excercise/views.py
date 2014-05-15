@@ -191,25 +191,18 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
     
     filtering = request.GET.get('filtering', None)
     submissions = submission_list(course_code, exercise_number, group_id, filtering)
+    
     if request.method == 'POST':
-        print request.POST
         formset = SubmissionFormSet(request.POST, queryset=submissions)
+        if formset.is_valid():
+            formset.save()
     else:
         formset = SubmissionFormSet(queryset=submissions)
-    
     res = []
-    forms = []
-    for f in formset:
-        forms.append({
-            'form': f
-        })
     i = 0
+    
+   
     for s in submissions:
-        exercise_number = s.exercise.number
-        exercise_id = s.exercise.pk
-        username = s.student.username
-        user_id = s.student.pk
-        grade = s.grade
         group = Course.objects.get(code=course_code).get_group(s.student)
         if group:
             group_name = group.name
@@ -218,16 +211,26 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
             group_name = None
             group_pk = None
         res.append({
-            'exercise_number': exercise_number,
-            'exercise_id': exercise_id,
-            'username': username,
-            'user_id': user_id,
-            'grade': grade,
+            'exercise_number': s.exercise.number,
+            'exercise_id': s.exercise.pk,
+            'username': s.student.username,
+            'user_id': s.student.pk,
+            'grade': s.grade,
             'group_name': group_name,
             'group_pk': group_pk,
-            'form': forms[i].get('form', None),
+            'datetime_submitted': s.datetime_submitted,
         })
-        i = i+1
+    
+    for f in formset:
+        f.exercise_number = res[i].get('exercise_number')
+        f.exercise_id = res[i].get('exercise_id')
+        f.username = res[i].get('username')
+        f.user_id = res[i].get('user_id')
+        f.group_name = res[i].get('group_name')
+        f.group_pk = res[i].get('group_pk')
+        f.datetime_submitted = res[i].get('datetime_submitted')
+        i=i+1
+    
     context = RequestContext(request)
     my_dict = { 'course_code': course_code,
                 'exercise_number': exercise_number,

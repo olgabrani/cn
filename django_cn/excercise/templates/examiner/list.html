@@ -20,17 +20,17 @@
         </tr>
     </thead>
     <tbody>
-    {% for s in res %}
-        {{s.form.id}}
+    {% for form in formset %}
         <tr>
+            {{form.id}}
             <td><input type="checkbox"></td>
-            <td>{{s.exercise_number}}</td>
-            <td>{{s.group_name}}</td>
-            <td>{{s.username}}</td>
-            <td>{{s.date_modified}}</td>
-            <td>{{s.form.grade}}</td>
+            <td>{{form.exercise_number}}</td>
+            <td>{{form.group_name}}</td>
+            <td>{{form.username}}</td>
+            <td>{{form.datetime_submitted}}</td>
+            <td>{{form.grade}}</td>
             <td>Download</td>
-            <td><a href="{% url 'answer' s.exercise_id s.user_id %}">View</a></td>
+            <td><a href="{% url 'answer' form.exercise_id form.user_id %}">View</a></td>
         </tr>
     {% endfor  %}
     </tbody>
