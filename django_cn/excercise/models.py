@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 from datetime import datetime, date
 from django.contrib.auth.models import User
+from filebrowser.fields import FileBrowseField
 
 def submission_list(course_code=None, exercise_number=None, group_id=None, filtering=None):
     if filtering == 'corrected':
@@ -100,6 +101,7 @@ class Exercise(models.Model):
     release_date = models.DateField(default=datetime.now())
     is_active = models.BooleanField()
     number = models.PositiveIntegerField()
+    document = FileBrowseField("PDF", max_length=200, directory="pdf/", extensions=[".pdf",".doc", ".docx"], blank=True, null=True)
 
     @property
     def questions(self):

@@ -4,13 +4,13 @@ from django.contrib.auth.views import login, logout
 from excercise.views import custom_login, custom_logout
 from django.conf.urls.static import static
 from django.conf import settings
+from filebrowser.sites import site
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'django_cn.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
+    url(r'^admin/filebrowser/', include(site.urls)),
+    url(r'^grappelli/', include('grappelli.urls')),
     url(r'^excercise/', include('excercise.urls')), 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/login/$',  custom_login),

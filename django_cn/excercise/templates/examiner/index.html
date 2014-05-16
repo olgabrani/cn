@@ -12,6 +12,7 @@
             <th>{{g.name}}</th>
         {% endfor %}
         <th>Συνολικά</th>
+        <th>PDFs</th>
     </tr>
     {% for e in exercises %}
         {% if e.course_code == c.code %}
@@ -34,6 +35,9 @@
                 {% if e.cnt_c > 0 %}
                     <a href="{% url 'grading_list' e.course_code e.number %}?filtering=corrected" class="corrected">{{e.cnt_c}} διορθωμένες</a>
                 {% endif %}
+            </td>
+            <td>
+                <a href="{{e.document.url}}" class="pdf questions" title="εκφώνηση άσκησης">&nbsp;</b>
             </td>
         </tr>
         {% endif %}

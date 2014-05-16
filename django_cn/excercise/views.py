@@ -39,7 +39,12 @@ def index(request):
             has_link = [u'Ημιτελής', u'Ανοιχτή']
             if e.submission_state in has_link: 
                 e.has_submission_link = True
-            res.append({'course_code': c.code, 'title':e.title, 'number':e.number, 'submission_state':e.submission_state, 'has_submission_link':e.has_submission_link})
+            res.append({'course_code': c.code, 
+                        'title':e.title, 
+                        'number':e.number, 
+                        'submission_state':e.submission_state, 
+                        'has_submission_link':e.has_submission_link, 
+                        'document':e.document})
     return render_to_response('index.html',{'has_course_link':has_course_link, 'exercises':res, 'courses': courses,}, context)
 
 @login_required
@@ -214,7 +219,15 @@ def examiner_index(request):
                 e.group_list.append({'group_id':group_id, 'cnt_c':cnt_c, 'cnt_s':cnt_s})
             e.cnt_s = e.cnt_submissions()
             e.cnt_c = e.cnt_submissions(filtering='corrected')
-            res.append({'course_code': c.code, 'title':e.title, 'number':e.number,'cnt_s':e.cnt_s, 'cnt_c':e.cnt_c, 'groups': e.groups, 'group_list': e.group_list })
+            res.append({'course_code': c.code, 
+                        'title':e.title, 
+                        'number':e.number,
+                        'cnt_s':e.cnt_s, 
+                        'cnt_c':e.cnt_c, 
+                        'groups': e.groups, 
+                        'group_list': e.group_list,
+                        'document':e.document
+                        })
     return render_to_response('examiner/index.html',{ 'exercises':res, 'courses': courses,}, context)
 
 
