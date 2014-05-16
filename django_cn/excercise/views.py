@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import login, logout
 from django.contrib.auth import authenticate, login
 from django.conf import settings
-from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm
+from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm, AnswerTextForm
 from excercise.models import submission_list
 import datetime
 
@@ -94,16 +94,22 @@ def exercise(request, course_code, exercise_number):
                 new_submission = form.save(commit=False)
                 new_submission.student = student
                 new_submission.exercise = exercise
+    
     if request.method == 'POST':
+        print request.FILES
         q_dict = slicedict(request.POST, 'q-')
         for k, v in q_dict.iteritems():
             answer = v
             t = k.split('-',2)
             question_pk = t[1]
             student_pk = t[2]
-            obj, created = Answer.objects.get_or_create(question_id= question_pk, student_id= student_pk)
-            obj.answer = answer
-            obj.save()
+            try:
+                instance = Answer.objects.get(question_id=question_pk,student_id=student_pk)
+                form = AnswerTextForm({'question':question_pk, 'student': student_pk, 'answer': answer}, instance=instance)
+            except:
+                form = AnswerTextForm({'question':question_pk, 'student': student_pk, 'answer': answer})
+            if form.is_valid():
+                form.save()
 
 
         if 'save' in request.POST.keys():
@@ -114,15 +120,17 @@ def exercise(request, course_code, exercise_number):
         new_submission.save()
 
     for q in questions:
-        q.field_name = 'q-%d-%d' %(q.pk, student.pk)
         if q.answer_type == 'T':
+            q.field_name = 'q-%d-%d' %(q.pk, student.pk)
             try:
                 obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
                 print obj.answer
                 q.value = obj.answer
             except:
                 q.value = None
-
+        if q.answer_type == 'I':
+            q.field_name = 'qi-%d-%d' %(q.pk, student.pk)
+    
     exercise.submission_code = exercise.submission_code(request.proxyUser)
     my_dict = {'course': course,
                'exercise': exercise,

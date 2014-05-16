@@ -160,12 +160,11 @@ class Answer(models.Model):
     question = models.ForeignKey(Question)
     student = models.ForeignKey(User)
     answer = models.TextField(null=True, blank=True)
+    img = models.ImageField(upload_to='documents/%Y/%m/%d', null=True, blank=True)
 
     def __unicode__(self):
         return self.question.order+' Student: ' +self.student.username
 
-    class Meta:
-        managed = False
 
 class Submission(models.Model):
     SUBMISSION_STATE = (

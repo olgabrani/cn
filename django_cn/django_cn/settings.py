@@ -97,7 +97,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-MEDIA_DIR = os.path.join(BASE_URL, 'media')
+MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
