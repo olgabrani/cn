@@ -2,46 +2,68 @@
 {% load markdown_deux_tags %}
 
 {% block main %}
-gia eksetastes{{my_dict.submission}}
- <section class="title">
-                <h4>{{ course.name }}<br> <span><strong>Oμάδα 1</strong> Τρίτη 10.30-12.45 </span></h4>
-                <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title}}</h3>
-            </section>
-            <section class="qas">
-                <form>
-                    <div class="theory">
-                        {{ exercise.theory|safe }}
-                    </div>
-                    {% for q in exercise.questions %} 
-                    <div class="qa">
-                        {% if q.answer_type == 'E' %}
-                            {{ q.text|markdown }}
-                        {% else %}
-                        <div class="qa-desc panel">
-                            <strong class="num">{{ q.order }}</strong>
-                            <p>{{ q.text|markdown }}</p>
-                        </div>
-                        {% endif %}
-                        {% if q.answer_type == "T" %}
-                        <textarea placeholder="{{ q.order }} Απάντηση"></textarea>
-                        {% elif q.answer_type == "I" %}
-                        <label for="file">{{ q.order }} Απάντηση</label>
-                        <input type="file" name="file" id="file" />
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                    
-                    <p class="submit">
-                        <button>Προσωρινή Αποθήκευση </button>
-                        <button type="submit" class="button success"data-reveal-id="unanswered" data-reveal>Υποβολή</button>
-                    </p>
-                </form>
-                <form method="post" action="">{% csrf_token %}
-                    <p class="panel grade-div">
-                        <label for="">Βαθμός</label>
-                        {{form.grade}}
-                        <button type="submit" class="button success small">OK</button>
-                    </p>
-                </form>
-            </section>
+<section class="title">
+        <h4>{{course.name}}</h4>
+        <table class="default">
+            <tr>
+                <th>'Ονομα</th>
+                <th>IP</th>
+                <th>Άσκηση</th>
+                <th>Έτος</th>
+                {% if group %}<th>Ομάδα</th>{% endif %}
+            </tr>
+            <tr>
+                <td>{{student.username}}</td>
+                <td>wip</td>
+                <td>{{exercise.number}}</td>
+                <td>{{exercise.course.school_year}}</td>
+                {% if group %}<td>{{group}}</td>{% endif %}
+            </tr>
+        </table>
+        <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title}}</h3>
+</section>
+
+<section class="qas">
+    <div class="clearfix">
+        <div class="toggle-panel">
+            <a href="" class="toggle-qa">Toggle <strong>questions</strong> visibility</a><br>
+            <a href="" class="toggle-suggested">Toggle <strong>suggested answers</strong> visibility</a>
+        </div>
+    </div>
+    {% for q in questions %} 
+        <div class="qa">
+        {% if q.answer_type == 'E' %}
+            <div class="theory">
+                {{ q.text|markdown }}
+            </div>
+        {% else %}
+            <div class="qa-desc panel">
+                <strong class="num">{{ q.order }}</strong>
+                <p>{{ q.text|markdown }}</p>
+            </div>
+            <h4>Aπάντηση {{q.order}}</h4>
+            <div class="answer">
+            {% if q.answer_type == 'T' %}
+                {{q.answer}}
+            {% elif q.answer_type == 'I' %}
+                <img src ="{{q.img.url}}">
+            {% endif %}
+            </div>
+            {% if q.answer_type == 'T' %}
+                <div class="suggested-answer">
+                    {{q.suggested_answer}}
+                </div>
+            {% endif %}
+
+        {% endif %}
+         </div>
+    {% endfor %}
+    <form method="post" action="">{% csrf_token %}
+        <p class="panel grade-div">
+            <label for="">Βαθμός</label>
+                {{form.grade}}
+                 <button type="submit" class="button success small">OK</button>
+         </p>
+    </form>
+</section>
 {% endblock main %}

@@ -7,9 +7,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import login, logout
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.conf import settings
-from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm, AnswerTextForm
+from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm, AnswerTextForm, AnswerImageForm
 from excercise.models import submission_list
 import datetime
 
@@ -110,6 +111,23 @@ def exercise(request, course_code, exercise_number):
                 form = AnswerTextForm({'question':question_pk, 'student': student_pk, 'answer': answer})
             if form.is_valid():
                 form.save()
+        
+        
+        qi_dict = slicedict(request.FILES, 'qi-')
+        for k, v in qi_dict.iteritems():
+            img = v
+            t = k.split('-',2)
+            question_pk = t[1]
+            student_pk = t[2]
+            print img, '!!!!!'
+            try:
+                instance = Answer.objects.get(question_id=question_pk,student_id=student_pk)
+                form = AnswerImageForm({'question':question_pk, 'student': student_pk},{'img': img}, instance=instance)
+            except:
+                form = AnswerImageForm({'question':question_pk, 'student': student_pk}, {'img':img})
+            if form.is_valid():
+                form.save()
+
 
 
         if 'save' in request.POST.keys():
@@ -130,7 +148,12 @@ def exercise(request, course_code, exercise_number):
                 q.value = None
         if q.answer_type == 'I':
             q.field_name = 'qi-%d-%d' %(q.pk, student.pk)
-    
+            try:
+                obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+                q.img = obj.img
+            except:
+                q.img = None
+
     exercise.submission_code = exercise.submission_code(request.proxyUser)
     my_dict = {'course': course,
                'exercise': exercise,
@@ -257,7 +280,23 @@ def answer(request, exercise_id, user_id):
 
     context = RequestContext(request)
     exercise = Exercise.objects.get(pk=exercise_id)
+    student = User.objects.get(pk=user_id)
     submission = Submission.objects.get(exercise__pk=exercise_id, student__pk=user_id)
+    
+    try:
+        course.group = exercise.course.get_group(student).name
+    except:
+        course.group = None
+    
+    questions = exercise.questions
+    for q in questions:
+        try:
+            obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+            q.answer = obj.answer
+            q.img = obj.img
+        except:
+            q.answer = 'test'
+
     if request.method == 'POST':
         form = SubmissionForm(request.POST, instance=submission)
         if form.is_valid():
@@ -274,8 +313,11 @@ def answer(request, exercise_id, user_id):
         form = SubmissionForm(instance=submission)
     my_dict = {
         'exercise': exercise,
+        'questions': questions,
         'submission': submission,
         'form': form,
+        'student': student,
+        'group': course.group,
     }
     return render_to_response('examiner/exercise.html', my_dict , context)
 

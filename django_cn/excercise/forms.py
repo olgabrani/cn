@@ -17,6 +17,12 @@ class AnswerTextForm(ModelForm):
         model = Answer
         fields = ['question', 'student', 'answer']
 
+class AnswerImageForm(ModelForm):
+    
+    class Meta:
+        model = Answer
+        fields = ['question', 'student', 'img']
+
 class StudentSubmissionForm(ModelForm):
     
     class Meta:
