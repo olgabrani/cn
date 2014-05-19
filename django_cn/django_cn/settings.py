@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'markdown_deux',
     'south',
     'excercise',
+    'parsing',
 )
 
 MIDDLEWARE_CLASSES = (

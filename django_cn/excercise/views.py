@@ -2,7 +2,7 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer
+from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer, Question
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import user_passes_test
@@ -26,8 +26,8 @@ def index(request):
     context = RequestContext(request)
     has_course_link = True
     courses = Course.objects.filter(is_active=True).select_related()
-    print courses
     res = []
+
     for c in courses:
         try:
             c.group_name = c.get_group(request.proxyUser).name
