@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
+import datetime
+from django.conf import settings
 from django.shortcuts import render, render_to_response, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer, Question
-from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from django.conf import settings
 from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm, AnswerTextForm, AnswerImageForm
+from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer, Question
 from excercise.models import submission_list
-import datetime
 
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)

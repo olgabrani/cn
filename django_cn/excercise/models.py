@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.db import models
 from datetime import datetime, date
+from django.db import models
 from django.contrib.auth.models import User
 from filebrowser.fields import FileBrowseField
 
@@ -27,6 +27,7 @@ def submission_list(course_code=None, exercise_number=None, group_id=None, filte
             usernames.append(m.username)
         submissions = submissions.filter(student__username__in=usernames)
     return submissions
+
 
 
 class Course(models.Model):

@@ -118,6 +118,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 USER_LOGIN_REDIRECT_URL = '/excercise/'
 EXAMINER_LOGIN_REDIRECT_URL = '/excercise/examiner/'
+GRAPPELLI_ADMIN_TITLE = 'CN admin'
 
 try:
     from local_settings import *
