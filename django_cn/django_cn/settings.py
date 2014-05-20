@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'south',
     'excercise',
     'parsing',
+    'easy_pdf',
 )
 
 MIDDLEWARE_CLASSES = (

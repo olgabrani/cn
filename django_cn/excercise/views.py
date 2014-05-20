@@ -13,6 +13,11 @@ from django.contrib.auth import authenticate, login
 from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm, AnswerTextForm, AnswerImageForm
 from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer, Question
 from excercise.models import submission_list
+from easy_pdf.views import PDFTemplateView
+
+class HelloPDFView(PDFTemplateView):
+    template_name = "hello.html"
+
 
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)
