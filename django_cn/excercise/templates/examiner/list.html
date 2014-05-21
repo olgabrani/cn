@@ -6,7 +6,7 @@
 </section>
 <form action="" method="POST">{% csrf_token %}
  {{ formset.management_form }}
-<table class="default sortable">
+<table class="default sortable check-fun">
     <thead>
         <tr>
             <th><input type="checkbox" /></th>
@@ -23,21 +23,26 @@
     {% for form in formset %}
         <tr>
             {{form.id}}
-            <td><input type="checkbox"></td>
+            <td><input type="checkbox" value="{{form.hidden_input}}"></td>
             <td>{{form.exercise_number}}</td>
             <td>{{form.group_name}}</td>
             <td>{{form.username}}</td>
             <td>{{form.datetime_submitted}}</td>
             <td>{{form.grade}}</td>
-            <td>Download</td>
+            <td><a href="{% url 'pdf_answer' form.exercise_id form.user_id %}">Download</a></td>
             <td><a href="{% url 'answer' form.exercise_id form.user_id %}">View</a></td>
         </tr>
     {% endfor  %}
     </tbody>
 </table>
 <p class="submit">
-<button type="submit" class="button success" style="float:right;">Αποθήκευη βαθμών</button>
-<button type="submit" class="button info">PDFs επιλεγμένων</button>
-</form>
+    <button type="submit" class="button success" style="float:right;">Αποθήκευη βαθμών</button>
 </p>
+</form>
+<form action="{% url 'pdf_answers' %}" method="POST">{% csrf_token %}
+    {% for form in formset %}
+    <input type="hidden" name="{{form.hidden_input}}" value="False">
+    {% endfor %}
+    <button type="submit" class="button info">PDFs επιλεγμένων</button>
+</form>
 {% endblock main %}

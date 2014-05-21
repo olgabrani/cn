@@ -14,10 +14,7 @@ from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmission
 from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer, Question
 from excercise.models import submission_list
 from easy_pdf.views import PDFTemplateView
-
-class HelloPDFView(PDFTemplateView):
-    template_name = "hello.html"
-
+from easy_pdf.rendering import render_to_pdf_response
 
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)
@@ -281,6 +278,7 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
         f.group_name = res[i].get('group_name')
         f.group_pk = res[i].get('group_pk')
         f.datetime_submitted = res[i].get('datetime_submitted')
+        f.hidden_input = 'a-%d-%d' %(res[i].get('exercise_id'), res[i].get('user_id'))
         i=i+1
     
     context = RequestContext(request)
@@ -338,4 +336,110 @@ def answer(request, exercise_id, user_id):
         'group': course.group,
     }
     return render_to_response('examiner/exercise.html', my_dict , context)
+
+class AnswerPDFView(PDFTemplateView):
+    template_name = "pdf_answer.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super(AnswerPDFView, self).get_context_data(**kwargs)
+        user_id = context['user_id']
+        exercise_id = context['exercise_id']
+        
+        exercise = Exercise.objects.get(pk=exercise_id)
+        student = User.objects.get(pk=user_id)
+    
+        submission = Submission.objects.get(exercise=exercise,student=student)
+        try:
+            course.group = exercise.course.get_group(student).name
+        except:
+            course.group = None
+    
+        questions = exercise.questions
+        for q in questions:
+            try:
+                obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+                q.answer = obj.answer
+                q.img = obj.img
+            except:
+                q.answer = 'No answer'
+                q.img = False
+    
+        res = []
+        res.append({
+            'exercise': exercise,
+            'questions': questions,
+            'student': student,
+            'group': course.group,
+            'submission': submission,
+        })
+        return super(AnswerPDFView, self).get_context_data(
+            pagesize="A4",
+            title="Hi there!",
+            res=res,
+            **kwargs
+        )
+
+class AnswersPDFView(PDFTemplateView):
+    template_name = "pdf_answer.html"
+
+    def get_context_data(self, **kwargs):
+        if request.POST:
+            res = request.POST['checks']
+        else: 
+            res = 'skata'
+        return super(AnswersPDFView, self).get_context_data(
+            pagesize="A4",
+            title="Hi there!",
+            res=res,
+            **kwargs
+        )
+
+@login_required
+@user_passes_test(is_examiner)
+def answers_view(request):
+    
+    context = RequestContext(request)
+    checks = request.POST
+    a_dict = slicedict(request.POST, 'a-')
+    res = []
+    for k, v in a_dict.iteritems():
+        if v == 'checked':
+            t = k.split('-',2)
+            exercise_id = t[1]
+            user_id = t[2]
+            try:
+                exercise = Exercise.objects.get(pk=exercise_id)
+                student = User.objects.get(pk=user_id)
+                print 'student_id', student
+            
+                submission = Submission.objects.get(exercise=exercise,student=student)
+                try:
+                    course.group = exercise.course.get_group(student).name
+                except:
+                    course.group = None
+            
+                questions = exercise.questions
+                for q in questions:
+                    try:
+                        obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+                        q.answer = obj.answer
+                        q.img = obj.img
+                    except:
+                        q.answer = 'No answer'
+                        q.img = False
+            
+                res.append({
+                    'exercise': exercise,
+                    'questions': questions,
+                    'student': student,
+                    'group': course.group,
+                    'submission': submission,
+                })
+            except:
+                print 'error'
+    context['res'] = res
+    return render_to_pdf_response(request, "pdf_answer.html", context, 'answers', "utf-8")
+
+
+
 

@@ -1,0 +1,51 @@
+<html>
+    <title>CN</title>
+    {% block extra_style %}
+        <style type="text/css">
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+            body {
+                font-family: Arial;
+                font-size:10pt;
+            }
+        </style>
+    {% endblock %}
+
+    <body>
+        <h1>Απαντήσεις</h1>
+        {% for r in res %}
+            <table border=1 cellpadding="3" align="left">
+                <tr>
+                    <td>Username</td>
+                    <td>Exercise</td>
+                    <td>Course</td>
+                    <td>Submission date</td>
+                    {% if r.group %}
+                    <td>Group</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>{{r.student.username}}</td>
+                    <td>{{r.exercise.number}}</td>
+                    <td>{{r.exercise.course}}</td>
+                    <td>{{r.submission.datetime_submitted}}</td>
+                    {% if r.group %}<td>{{r.group}}</td>{% endif %}
+                </tr>
+            </table>
+            {% for q in r.questions %}
+                <p><strong>{{q.order}}</strong></p>
+                {% if q.answer_type == 'T' %}
+                    {{q.answer}}
+                {% endif %}
+                {% if q.answer_type == 'I' %}
+                    {% if q.img %}
+                        <img src="{{q.img.url}}">
+                    {%  endif%}
+                {% endif %}
+            {% endfor %}
+            <hr>
+        {% endfor %}
+    </body>
+</html>
