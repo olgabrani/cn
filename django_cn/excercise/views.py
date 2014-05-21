@@ -149,17 +149,16 @@ def exercise(request, course_code, exercise_number):
             q.field_name = 'q-%d-%d' %(q.pk, student.pk)
             try:
                 obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
-                print obj.answer
                 q.value = obj.answer
             except:
-                q.value = None
+                print 'no obj found'
         if q.answer_type == 'I':
             q.field_name = 'qi-%d-%d' %(q.pk, student.pk)
             try:
                 obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
                 q.img = obj.img
             except:
-                q.img = None
+                print 'no obj found'
 
     exercise.submission_code = exercise.submission_code(request.proxyUser)
     my_dict = {'course': course,
@@ -316,7 +315,7 @@ def answer(request, exercise_id, user_id):
             q.answer = obj.answer
             q.img = obj.img
         except:
-            q.answer = 'test'
+            q.answer = 'No answer'
 
     if request.method == 'POST':
         form = SubmissionForm(request.POST, instance=submission)
