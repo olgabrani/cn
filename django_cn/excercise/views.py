@@ -104,7 +104,6 @@ def exercise(request, course_code, exercise_number):
                 new_submission.exercise = exercise
     
     if request.method == 'POST':
-        print request.FILES
         q_dict = slicedict(request.POST, 'q-')
         for k, v in q_dict.iteritems():
             answer = v
@@ -245,8 +244,11 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
         if formset.is_valid():
             for f in formset:
                 s = f.save(commit=False)
-                s.state = 'C'
-                print s
+                if s.grade:
+                    s.state = 'C'
+                    s.datetime_corrected = datetime.datetime.now()
+                else:
+                    s.state = 'S'
                 s.save()
                 return redirect('examiner_index')
     else:
