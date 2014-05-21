@@ -8,14 +8,12 @@
         <table class="default">
             <tr>
                 <th>'Ονομα</th>
-                <th>IP</th>
                 <th>Άσκηση</th>
                 <th>Έτος</th>
                 {% if course.group %}<th>Ομάδα</th>{% endif %}
             </tr>
             <tr>
                 <td>{{request.proxyUser.username}}</td>
-                <td>{{request.META.REMOTE_ADDR}}</td>
                 <td>{{exercise.number}}</td>
                 <td>{{course.school_year}}</td>
                 {% if course.group %}<td>{{course.group}}</td>{% endif %}
