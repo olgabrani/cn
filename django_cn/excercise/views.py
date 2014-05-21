@@ -244,7 +244,12 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
     if request.method == 'POST':
         formset = SubmissionFormSet(request.POST, queryset=submissions)
         if formset.is_valid():
-            formset.save()
+            for f in formset:
+                s = f.save(commit=False)
+                s.state = 'C'
+                print s
+                s.save()
+                return redirect('examiner_index')
     else:
         formset = SubmissionFormSet(queryset=submissions)
     res = []
