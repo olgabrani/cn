@@ -138,10 +138,12 @@ def exercise(request, course_code, exercise_number):
 
         if 'save' in request.POST.keys():
             new_submission.state = 'I'
+            new_submission.save()
         else:
             new_submission.state = 'S'
             new_submission.datetime_submitted = datetime.datetime.now()
-        new_submission.save()
+            new_submission.save()
+            return redirect('index')
 
     for q in questions:
         if q.answer_type == 'T':

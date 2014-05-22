@@ -35,27 +35,42 @@ $(document).ready(function(){
         $('.suggested-answer').toggle();
     });
 
-    $('table th input').change(function() {
-        
-        if ($(this).hasClass('checked')) {
-            $(this).parents('table').find('td input[type="checkbox"]').removeAttr('checked');
-            
-        } else {
-            $(this).parents('table').find('td input[type="checkbox"]').prop( "checked", true );
-            
-        }
-        $(this).toggleClass('checked');
-    });
-    
-    $('.check-fun td').find(':checkbox').bind('change', function(){
-        var val = $(this).val();
+    checkForm = function(check) {
+        console.log('checkform');
+        var val = check.val();
         var el = $("input[name="+val+"]");
-        if ($(this).is(":checked")){
+        if (check.is(":checked")){
             el.val('checked');
         } else {
             el.val('False');
         }
 
+   }
+
+
+    $('table th input').change(function() {
+        
+        if ($(this).hasClass('checked')) {
+            console.log('check', check);
+            var check = $(this).parents('table').find('td :checkbox');
+            check.removeAttr('checked');
+            check.each(function(i){
+                checkForm($(this));
+            });
+        } else {
+            var check = $(this).parents('table').find('td :checkbox');
+            console.log('check', check);
+            check.prop( "checked", true );
+            check.each(function(i){
+                checkForm($(this));
+            });
+        }
+        $(this).toggleClass('checked');
+    });
+   
+
+    $('.check-fun td').find(':checkbox').bind('change', function(){
+        checkForm($(this));
     });
 });
 
