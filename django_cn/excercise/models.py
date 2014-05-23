@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from datetime import datetime, date
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
 from filebrowser.fields import FileBrowseField
 
@@ -232,6 +233,19 @@ class MdlUserEnrolments(models.Model):
         course_code = MdlCourse.objects.using('users').get(pk=courseid).shortname
         return course_code
 
+    @property
+    def is_student(self):
+        courseid = MdlEnrol.objects.using('users').get(pk=self.enrolid).courseid
+        contexts = MdlContext.objects.using('users').filter(instanceid=courseid)
+        c_ids = []
+        for c in contexts:
+            c_ids.append(c.pk)
+        try: 
+            r = MdlRoleAssignments.objects.using('users').get(roleid=settings.STUDENT_ROLE_ID,contextid__in=c_ids, userid=self.userid)
+            return True
+        except:
+            return False
+
     class Meta:
         managed = False
         db_table = 'mdl_user_enrolments'
@@ -261,6 +275,24 @@ class MdlGroupsMembers(models.Model):
         managed = False
         db_table = 'mdl_groups_members'
 
+class MdlRoleAssignments(models.Model):
+    roleid = models.BigIntegerField()
+    contextid = models.BigIntegerField()
+    userid = models.BigIntegerField()
+    
+    class Meta:
+        managed = False
+        db_table = 'mdl_role_assignments'
+
+class MdlContext(models.Model):
+    instanceid = models.BigIntegerField()
+    
+    class Meta:
+        managed = False
+        db_table = 'mdl_context'
+
+
+
 class ProxyUser(User):
     class Meta:
         proxy = True
@@ -269,13 +301,15 @@ class ProxyUser(User):
     def is_moodle_user(self):
         return MdlUser.objects.using('users').get(username=self.username)
 
+    
     @property
     def enrolled_courses(self):
         if self.is_moodle_user:
             course_codes = []
             enrolments = MdlUserEnrolments.objects.using('users').filter(userid=self.is_moodle_user.pk)
             for e in enrolments:
-                course_codes.append(e.course_code)
+                if e.is_student:
+                    course_codes.append(e.course_code)
             enrolled_courses = Course.objects.filter(code__in=course_codes, is_active=True)
             for e in enrolled_courses:
                 e.group = e.get_group(self)
