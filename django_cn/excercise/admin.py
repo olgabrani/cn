@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from excercise.models import Course, Exercise, Question, Submission
+from excercise.models import Course, Exercise, Question, Submission, Application
 from parsing.models import Parse
 
 class CourseAdmin(admin.ModelAdmin):
@@ -19,6 +19,7 @@ class ExerciseAdmin(admin.ModelAdmin):
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('exercise', 'student','state', 'grade')
 
+admin.site.register(Application)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Exercise, ExerciseAdmin)
 admin.site.register(Submission, SubmissionAdmin)

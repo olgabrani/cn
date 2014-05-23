@@ -4,8 +4,9 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>CN - Olga Brani</title>
+        <title>{{APP.tab_title}}</title>
         <link rel="stylesheet" href="{% static 'css/app.css' %}"/>
+        <style>{{APP.extra_styles}}</style>
     </head>
     <body>
         {% block header%}
@@ -17,7 +18,7 @@
                     {% endblock index_url %}
                         <img src="{% static 'images/logo_ntua.png' %}" alt="">
                     </a>
-                    <span>Εργαστήριο Δικτύων Υπολογιστών</span>
+                    <span>{{APP.title}}</span>
                 </h1>
                 <div class="small-7 column rt">
                     {% block header_user %}

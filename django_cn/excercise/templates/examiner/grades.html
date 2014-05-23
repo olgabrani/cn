@@ -1,0 +1,29 @@
+{% extends 'examiner/examiner_base.html' %}
+{% block main %}
+{% for c in courses %}
+<section class="title">
+    <h6>Ακαδημαϊκό έτος: {{c.school_year}}</h6>
+    <h4>{{c.name}}</h4>
+</section>
+<table class="default">
+    <tr>
+        <th>Username</th>
+        <th>Group</th>
+        {% for e in c.exercises %}
+            <th>Exercise {{e.number}}</th>
+        {% endfor %}
+    </tr>
+    {% for s in c.students %}
+    <tr>
+        <td>{{s.username}}</td>
+        <td>{{s.group}}</td>
+        {% for e in s.exercises %}
+            <td>{{e.grade}}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+
+</table>
+    {% endfor %}
+{% endblock main %}
+

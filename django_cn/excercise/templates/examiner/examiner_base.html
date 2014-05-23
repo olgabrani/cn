@@ -2,4 +2,9 @@
 {% block index_url %}
     <a href="{% url 'examiner_index' %}">
 {% endblock index_url %}
+{% block menu %}
+{% url 'grades' as grades %}
+    <a href="{% url 'grades' %}" {% if request.get_full_path == grades %}class="current"{% endif %}
+>Βαθμολογίες</a>
+{% endblock menu %}
 

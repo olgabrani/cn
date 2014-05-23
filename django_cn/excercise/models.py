@@ -29,7 +29,20 @@ def submission_list(course_code=None, exercise_number=None, group_id=None, filte
         submissions = submissions.filter(student__username__in=usernames)
     return submissions
 
+class Application(models.Model):
 
+    title = models.CharField(max_length=255, blank=False, null=False)
+    tab_title = models.CharField(max_length=255, blank=False, null=False)
+    footer_content = models.TextField(default="",blank=True)
+    extra_styles = models.TextField(default="",blank=True)
+    info = models.TextField(default="",blank=True)
+
+    @classmethod
+    def current(cls):
+        return cls.objects.get(pk=1)
+
+    def __unicode__(self):
+        return self.title
 
 class Course(models.Model):
     name = models.CharField(max_length=128)
@@ -91,6 +104,15 @@ class Course(models.Model):
         return self.cnt_submissions()
     
 
+    @property
+    def submissions(self):
+        return submission_list(self.code, 0, None, 'corrected')
+
+    @property
+    def student_list(self):
+        return User.objects.filter(submission=self.submissions).select_related().distinct()
+
+    
     def __unicode__(self):
         return self.name + ' ( Code:' + self.code +' )'
 
@@ -233,19 +255,27 @@ class MdlUserEnrolments(models.Model):
         course_code = MdlCourse.objects.using('users').get(pk=courseid).shortname
         return course_code
 
-    @property
-    def is_student(self):
+    def is_role(self, role_id):
         courseid = MdlEnrol.objects.using('users').get(pk=self.enrolid).courseid
         contexts = MdlContext.objects.using('users').filter(instanceid=courseid)
         c_ids = []
         for c in contexts:
             c_ids.append(c.pk)
         try: 
-            r = MdlRoleAssignments.objects.using('users').get(roleid=settings.STUDENT_ROLE_ID,contextid__in=c_ids, userid=self.userid)
+            r = MdlRoleAssignments.objects.using('users').get(roleid=role_id,contextid__in=c_ids, userid=self.userid)
+            print role_id
             return True
         except:
             return False
 
+    @property
+    def is_student(self):
+        return self.is_role(settings.STUDENT_ROLE_ID)
+    
+    @property
+    def is_examiner(self):
+        return self.is_role(settings.EXAMINER_ROLE_ID)
+       
     class Meta:
         managed = False
         db_table = 'mdl_user_enrolments'
@@ -300,17 +330,30 @@ class ProxyUser(User):
     @property
     def is_moodle_user(self):
         return MdlUser.objects.using('users').get(username=self.username)
-
     
-    @property
-    def enrolled_courses(self):
+    def enrolled_courses_role(self, role):
         if self.is_moodle_user:
             course_codes = []
             enrolments = MdlUserEnrolments.objects.using('users').filter(userid=self.is_moodle_user.pk)
             for e in enrolments:
-                if e.is_student:
-                    course_codes.append(e.course_code)
+                if role == 'student':
+                    if e.is_student:
+                        course_codes.append(e.course_code)
+                if role == 'examiner':
+                    if e.is_examiner:
+                        course_codes.append(e.course_code)
             enrolled_courses = Course.objects.filter(code__in=course_codes, is_active=True)
             for e in enrolled_courses:
                 e.group = e.get_group(self)
             return enrolled_courses
+
+    
+    # for students
+    @property
+    def enrolled_courses(self):
+        return self.enrolled_courses_role('student') 
+
+    # for examiners
+    @property
+    def enrolled_courses_examiner(self):
+        return self.enrolled_courses_role('examiner') 

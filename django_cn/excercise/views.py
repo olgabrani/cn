@@ -203,7 +203,7 @@ def custom_logout(request):
 def examiner_index(request):
     
     context = RequestContext(request)
-    courses = Course.objects.filter(is_active=True).select_related()
+    courses = request.proxyUser.enrolled_courses_examiner
     res = []
     for c in courses:
         c.groups = c.get_groups
@@ -231,6 +231,38 @@ def examiner_index(request):
                         'document':e.document
                         })
     return render_to_response('examiner/index.html',{ 'exercises':res, 'courses': courses,}, context)
+
+@login_required
+@user_passes_test(is_examiner)
+def grades(request):
+    
+    context = RequestContext(request)
+    courses = request.proxyUser.enrolled_courses_examiner
+    for c in courses:
+        c.students = []
+        for s in c.student_list: 
+            username = s.username
+            if c.get_group(s):
+                group = c.get_group(s).name
+            else:
+                None
+            exercises = []
+            for e in c.exercises:
+                try: 
+                    e.grade = Submission.objects.get(exercise=e,student=s).grade
+                except:
+                    e.grade = ''
+                exercises.append({
+                    'number': e.number,
+                    'grade': e.grade,
+                })
+            c.students.append({
+                'username': username,
+                'group': group,
+                'exercises': exercises,
+            })
+
+    return render_to_response('examiner/grades.html',{'courses': courses,}, context)
 
 
 
