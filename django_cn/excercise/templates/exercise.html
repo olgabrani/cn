@@ -22,7 +22,7 @@
         <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title}}</h3>
     </section>
     <section class="qas">
-        <form method="post" action=" "enctype="multipart/form-data" >{% csrf_token %}
+        <form method="post" action="" enctype="multipart/form-data" id="exercise-submit">{% csrf_token %}
             {% for q in questions %} 
                 <div class="qa">
 
@@ -48,10 +48,33 @@
             
             {% if exercise.submission_code == 'O' or exercise.submission_code == 'I' %}            
                 <p class="submit">
-                    <button type="submit" class="save" name="save">Προσωρινή Αποθήκευση </button>
-                    <button type="submit" class="button success" name="submit">Υποβολή</button>
+                    <a href="#" data-reveal-id="go-back" data-reveal class="back"><<Όλες οι ασκήσεις</a>
+                    <button  class="save" name="save">Προσωρινή Αποθήκευση </button>
+                    <button  class="button success" name="finilize" id="reveal-unanswered">Υποβολή</button>
                 </p>
             {% endif %}
         </form>
     </section>
 {% endblock main %}
+
+{% block modals %}
+<div id="go-back" class="reveal-modal small" data-reveal>
+    <p class="lead">Οι αλλαγές που δεν έχετε αποθηκεύσει θα χαθούν.</p>
+    <p>Είστε σίγουροι ότι θέλετε να συνεχίσετε;</p>
+    <a class="close-reveal-modal">&#215;</a>
+    <p>
+        <button class="small alert cancel">Ακύρωση</button>
+        <a href="{% url 'index' %}" class="button success small">Ναι</a>
+    </p>
+</div>
+<div id="unanswered" class="reveal-modal small" data-reveal>
+    <p class="lead">H υποβολή είναι οριστική.<br><span></span></p>
+    <p>Είστε σίγουροι ότι θέλετε να συνεχίσετε;</p>
+    <a class="close-reveal-modal">&#215;</a>
+    <p>
+        <button class="small alert cancel">Ακύρωση</button>
+        <a href="#" class="button success small">Ναι</a>
+    </p>
+</div>
+
+{% endblock modals %}

@@ -1,30 +1,30 @@
-            {% if course.exercises %}
-            <table class="default">
-                <tr>
-                    <th>#</th>
-                    <th width="60%">Άσκηση</th>
-                    <th>Υποβολή</th>
-                    <th>Εκφώνηση</th>
-                </tr>
-                {% for exercise in exercises %}
-                {% if exercise.course_code == course.code %}
-                <tr>
-                    <td>{{ exercise.number }}</td>
-                    <td>{{ exercise.title }}</td>
-                    <td>
-                        {% if exercise.has_submission_link %}
-                        <a href="{% url 'exercise' course.code exercise.number %}">
-                            {{ exercise.submission_state}}
-                        </a>
-                        {% else %}
-                            {{ exercise.submission_state}}
-                        {% endif %}
-                    </td>
-                    <td><a href="{{exercise.document.url}}">PDF</a></td>
-                </tr>
-                {% endif %}
-               {% endfor %}
-            </table>
+{% if course.exercises %}
+<table class="default">
+    <tr>
+        <th>#</th>
+        <th width="60%">Άσκηση</th>
+        <th>Υποβολή</th>
+        <th>Εκφώνηση</th>
+    </tr>
+    {% for exercise in exercises %}
+    {% if course.name == exercise.course_name %}
+    <tr>
+        <td>{{ exercise.number }}</td>
+        <td>{{ exercise.title }}</td>
+        <td>
+            {% if exercise.has_submission_link %}
+            <a href="{% url 'exercise' course.code exercise.number %}">
+                {{ exercise.submission_state}}
+            </a>
             {% else %}
-                <p>Δεν υπάρχουν ακόμα ασκήσεις για αυτό το μάθημα</p>
+                {{ exercise.submission_state}}
             {% endif %}
+        </td>
+        <td><a href="{{exercise.document.url}}">PDF</a></td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+{% else %}
+    <p>Δεν υπάρχουν ακόμα ασκήσεις για αυτό το μάθημα</p>
+{% endif %}

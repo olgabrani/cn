@@ -62,21 +62,6 @@ class Course(models.Model):
     def exercises(self):
         return self.exercise_set.filter(is_active=True)
     
-    def get_group(self, user):
-
-        userid = MdlUser.objects.using('users').get(username=user.username).pk
-        try:
-            groupid = MdlGroupsMembers.objects.using('users').get(userid=userid).groupid
-            try: 
-                courseid = MdlCourse.objects.using('users').get(shortname=self.code).pk
-                group = MdlGroups.objects.using('users').get(pk=groupid, courseid=courseid)
-            except:
-                group = None
-        except: 
-            group = None
-
-        return group 
-
     @property
     def get_groups(self):
         
@@ -87,14 +72,7 @@ class Course(models.Model):
 
         groups = MdlGroups.objects.using('users').filter(courseid=courseid)
         return groups
-
-    def cnt_submissions(self,filtering=None):
-        cnt_submissions = 0
-        submissions = submission_list(self.code, None, None, filtering)
-        if submissions:
-            cnt_submissions = submissions.count()
-        return cnt_submissions
-
+    
     @property
     def cnt_subm_corrected(self):
         return self.cnt_submissions(filtering='corrected')
@@ -112,7 +90,46 @@ class Course(models.Model):
     def student_list(self):
         return User.objects.filter(submission=self.submissions).select_related().distinct()
 
-    
+    # Returns all active courses
+    @classmethod
+    def active_courses(cls):
+        return cls.objects.filter(is_active=True)
+
+    # Returns all active courses with given course code
+    @classmethod
+    def get_course(cls,code):
+        return cls.active_courses().get(code=code)
+
+
+    def get_group(self, user):
+
+        userid = MdlUser.objects.using('users').get(username=user.username).pk
+        try:
+            groupid = MdlGroupsMembers.objects.using('users').get(userid=userid).groupid
+            try: 
+                courseid = MdlCourse.objects.using('users').get(shortname=self.code).pk
+                group = MdlGroups.objects.using('users').get(pk=groupid, courseid=courseid)
+            except:
+                group = None
+        except: 
+            group = None
+
+        return group 
+
+    def get_group_name(self,user):
+        group_name = ''
+        if self.get_group(user):
+            group_name = self.get_group(user).name
+        return group_name
+
+    def cnt_submissions(self,filtering=None):
+        cnt_submissions = 0
+        submissions = submission_list(self.code, None, None, filtering)
+        if submissions:
+            cnt_submissions = submissions.count()
+        return cnt_submissions
+
+        
     def __unicode__(self):
         return self.name + ' ( Code:' + self.code +' )'
 
@@ -134,6 +151,11 @@ class Exercise(models.Model):
     @property
     def course_code(self):
         return self.course.code
+
+    # Get exercise instance by given parameters and return selected questions as well
+    @classmethod
+    def get_exercise(cls,course,number):
+        return cls.objects.select_related('questions').get(course=course, number=number)
 
     def submission_code(self, user):
         try:
@@ -188,6 +210,11 @@ class Answer(models.Model):
     answer = models.TextField(null=True, blank=True)
     img = models.ImageField(upload_to='documents/%Y/%m/%d', null=True, blank=True)
 
+    @classmethod
+    def get_answer(cls,question,student):
+        return cls.objects.get(question=question, student=student)
+
+
     def __unicode__(self):
         return self.question.order+' Student: ' +self.student.username
 
@@ -206,12 +233,17 @@ class Submission(models.Model):
     datetime_corrected = models.DateTimeField(null=True, blank=True)
     state = models.CharField(max_length=1, choices = SUBMISSION_STATE, default='I')
     grade = models.CharField(max_length=2, null=True, blank=True)
+    examiner = models.ForeignKey(User, related_name="submission_examiner",null=True, blank=True)
 
     @property
     def group_id(self):
         userid = MdlUser.objects.using('users').get(username=self.student.username).pk
         group_id = MdlGroupsMembers.objects.using('users').get(userid=userid).pk
         return group_id
+    
+    @classmethod
+    def get_submission(cls, exercise, student):
+        return cls.objects.get(exercise=exercise, student=student)
 
     def __unicode__(self):
         return self.student.username

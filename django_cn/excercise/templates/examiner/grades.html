@@ -7,7 +7,7 @@
 </section>
 <table class="default">
     <tr>
-        <th>Username</th>
+        <th>Name</th>
         <th>Group</th>
         {% for e in c.exercises %}
             <th>Exercise {{e.number}}</th>
@@ -15,7 +15,7 @@
     </tr>
     {% for s in c.students %}
     <tr>
-        <td>{{s.username}}</td>
+        <td>{{s.fullname}}</td>
         <td>{{s.group}}</td>
         {% for e in s.exercises %}
             <td>{{e.grade}}</td>

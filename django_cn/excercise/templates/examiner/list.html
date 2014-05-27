@@ -26,7 +26,7 @@
             <td><input type="checkbox" value="{{form.hidden_input}}"></td>
             <td>{{form.exercise_number}}</td>
             <td>{{form.group_name}}</td>
-            <td>{{form.username}}</td>
+            <td>{{form.student_fullname}}</td>
             <td>{{form.datetime_submitted|date:'d.m.Y'}}</td>
             <td>{{form.grade}}</td>
             <td><a href="{% url 'pdf_answer' form.exercise_id form.user_id %}">Download</a></td>

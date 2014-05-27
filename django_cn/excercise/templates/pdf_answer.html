@@ -18,7 +18,7 @@
         {% for r in res %}
             <table border=1 cellpadding="3" align="left">
                 <tr>
-                    <td>Username</td>
+                    <td>Name</td>
                     <td>Exercise</td>
                     <td>Course</td>
                     <td>Submission date</td>
@@ -27,7 +27,7 @@
                     {% endif %}
                 </tr>
                 <tr>
-                    <td>{{r.student.username}}</td>
+                    <td>{{r.student.get_full_name}}</td>
                     <td>{{r.exercise.number}}</td>
                     <td>{{r.exercise.course}}</td>
                     <td>{{r.submission.datetime_submitted}}</td>

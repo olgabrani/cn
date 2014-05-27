@@ -6,14 +6,14 @@
         <h4>{{course.name}}</h4>
         <table class="default">
             <tr>
-                <th>'Ονομα</th>
+                <th>Ονοματεπώνυμο</th>
                 <th>IP</th>
                 <th>Άσκηση</th>
                 <th>Έτος</th>
                 {% if group %}<th>Ομάδα</th>{% endif %}
             </tr>
             <tr>
-                <td>{{student.username}}</td>
+                <td>{{student.get_full_name}}</td>
                 <td>wip</td>
                 <td>{{exercise.number}}</td>
                 <td>{{exercise.course.school_year}}</td>

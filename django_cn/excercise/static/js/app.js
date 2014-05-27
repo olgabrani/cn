@@ -72,6 +72,40 @@ $(document).ready(function(){
     $('.check-fun td').find(':checkbox').bind('change', function(){
         checkForm($(this));
     });
+
+    $('.reveal-modal .cancel').click(function(e){
+        e.preventDefault();
+        $(this).parents('.reveal-modal').foundation('reveal', 'close');
+    });
+
+    $('#reveal-unanswered').click(function(e){
+        e.preventDefault();
+        $('#unanswered').foundation('reveal','open');
+        var cnt = 0;
+        $('#exercise-submit').find('textarea').each(function(){
+           if( this.value == ''){
+                cnt++;
+            }
+        }); 
+        if (cnt > 0 ){
+            var text = 'Δεν έχετε απαντήσει σε <strong>'+cnt+'</strong> ερωτήσεις.'
+            $('#unanswered .lead span').html(text);
+        }
+
+    });
+
+    $('#unanswered .success').click(function(e){
+        e.preventDefault();
+        $('#exercise-submit').submit();
+        console.log('after submit');
+        $(this).parents('.reveal-modal').foundation('reveal', 'close');
+    });
+
+    $('.qa textarea').bind("paste",function(e) {
+        e.preventDefault();
+    });
+
+
 });
 
 

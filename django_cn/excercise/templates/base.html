@@ -23,7 +23,7 @@
                 <div class="small-7 column rt">
                     {% block header_user %}
                         {% if user.is_authenticated %}
-                            <p>Welcome <strong>{{ user.username }}</strong> <a href="{% url 'excercise.views.custom_logout' %}">(έξοδος)</a></p>
+                            <p>Καλωσήρθες <strong>{{ user.get_full_name }}</strong> <a href="{% url 'excercise.views.custom_logout' %}">(έξοδος)</a></p>
                         {% endif %}
                     {% endblock header_user %}
                     {% block menu %}{% endblock menu %}
@@ -32,10 +32,11 @@
         </header>
         {% endblock header %}
         <div class="row main">
-                {% block main %}
-                {% endblock main %}
+            {% block main %}
+            {% endblock main %}
         </div>
         {% include 'footer.html' %}
+        {% block modals %}{% endblock modals %}
         <script src="{% static 'js/jquery.min.js' %}"></script>
         <script src="{% static 'js/foundation.min.js' %}"></script>
         <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>

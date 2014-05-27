@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+from django.utils.timezone import utc
 from django.conf import settings
 from django.shortcuts import render, render_to_response, redirect
 from django.http import HttpResponse, HttpResponseRedirect
@@ -16,6 +17,8 @@ from excercise.models import submission_list
 from easy_pdf.views import PDFTemplateView
 from easy_pdf.rendering import render_to_pdf_response
 
+now = datetime.datetime.utcnow().replace(tzinfo=utc)
+
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)
     return user.groups.filter(name='examiner')
@@ -25,29 +28,36 @@ def slicedict(d, s):
 
 @login_required
 def index(request):
+    
     context = RequestContext(request)
-    has_course_link = True
-    courses = Course.objects.filter(is_active=True).select_related()
-    res = []
+    student = request.proxyUser
+    courses = student.enrolled_courses
+    exercises = []
 
     for c in courses:
-        try:
-            c.group_name = c.get_group(request.proxyUser).name
-        except:
-            c.group_name = None
+        c.group_name = c.get_group_name(student)
         for e in c.exercises:
-            e.submission_state = e.submission_state(request.proxyUser)
+            e.submission_state = e.submission_state(student)
             e.has_submission_link = False
             has_link = [u'Ημιτελής', u'Ανοιχτή']
             if e.submission_state in has_link: 
                 e.has_submission_link = True
-            res.append({'course_code': c.code, 
-                        'title':e.title, 
-                        'number':e.number, 
-                        'submission_state':e.submission_state, 
-                        'has_submission_link':e.has_submission_link, 
-                        'document':e.document})
-    return render_to_response('index.html',{'has_course_link':has_course_link, 'exercises':res, 'courses': courses,}, context)
+            exercises.append({
+                'course_name': c.name,
+                'title':e.title, 
+                'number':e.number, 
+                'submission_state':e.submission_state, 
+                'has_submission_link':e.has_submission_link, 
+                'document':e.document
+            })
+    
+    my_dict = {
+        'has_course_link': True,
+        'courses': courses,
+        'exercises': exercises,
+    }
+    
+    return render_to_response('index.html', my_dict, context)
 
 @login_required
 def student_redir(request):
@@ -57,20 +67,25 @@ def student_redir(request):
 def course(request, course_code):
 
     context = RequestContext(request)
-    course = Course.objects.get(code=course_code)
-    try: 
-        course.group_name = course.get_group(request.proxyUser).name
-    except:
-        course.group_name = None
+    student = request.proxyUser
+    course = Course.get_course(course_code)
+    course.group_name = course.get_group_name(student)
     exercises = course.exercises
+    
     for e in exercises:
-        e.submission_state = e.submission_state(request.proxyUser)
-        e.submission_code = e.submission_code(request.proxyUser)
+        e.submission_state = e.submission_state(student)
+        e.submission_code = e.submission_code(student)
         e.has_submission_link = False
         has_link = [u'Ημιτελής', u'Ανοιχτή']
         if e.submission_state in has_link: 
             e.has_submission_link = True
-    return render_to_response('course.html',{'course':course, 'exercises':exercises }, context)
+        e.course_name = course.name
+
+    my_dict = {
+        'course': course,
+        'exercises': exercises,
+    }
+    return render_to_response('course.html', my_dict, context)
 
 
 
@@ -78,19 +93,20 @@ def course(request, course_code):
 def exercise(request, course_code, exercise_number):
 
     context = RequestContext(request)
-    course = Course.objects.get(code=course_code)
+    course = Course.get_course(course_code)
    
     try:
         course.group = course.get_group(request.proxyUser).name
     except:
         course.group = None
     
-    exercise = Exercise.objects.select_related('questions').get(course=course,number=exercise_number)
+    exercise = Exercise.get_exercise(course,exercise_number)
     questions = exercise.questions
     student = request.user
     
     try:
-        submission = Submission.objects.get(exercise=exercise,student=student)
+        submission = Submission.get_submission(exercise,student)
+        
         if request.method == 'POST':
             form = StudentSubmissionForm(request.POST, instance=submission)
             if form.is_valid():
@@ -111,7 +127,7 @@ def exercise(request, course_code, exercise_number):
             question_pk = t[1]
             student_pk = t[2]
             try:
-                instance = Answer.objects.get(question_id=question_pk,student_id=student_pk)
+                instance = Answer.get_answer(question_pk,student)
                 form = AnswerTextForm({'question':question_pk, 'student': student_pk, 'answer': answer}, instance=instance)
             except:
                 form = AnswerTextForm({'question':question_pk, 'student': student_pk, 'answer': answer})
@@ -127,7 +143,7 @@ def exercise(request, course_code, exercise_number):
             student_pk = t[2]
             print img, '!!!!!'
             try:
-                instance = Answer.objects.get(question_id=question_pk,student_id=student_pk)
+                instance = Answer.get_answer(question_pk, student)
                 form = AnswerImageForm({'question':question_pk, 'student': student_pk},{'img': img}, instance=instance)
             except:
                 form = AnswerImageForm({'question':question_pk, 'student': student_pk}, {'img':img})
@@ -140,8 +156,8 @@ def exercise(request, course_code, exercise_number):
             new_submission.state = 'I'
             new_submission.save()
         else:
-            new_submission.state = 'S'
-            new_submission.datetime_submitted = datetime.datetime.now()
+            new_submission.state = 'C'
+            new_submission.datetime_submitted = now
             new_submission.save()
             return redirect('index')
 
@@ -149,22 +165,23 @@ def exercise(request, course_code, exercise_number):
         if q.answer_type == 'T':
             q.field_name = 'q-%d-%d' %(q.pk, student.pk)
             try:
-                obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+                obj = Answer.get_answer(q.pk, student)
                 q.value = obj.answer
             except:
                 print 'no obj found'
         if q.answer_type == 'I':
             q.field_name = 'qi-%d-%d' %(q.pk, student.pk)
             try:
-                obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+                obj = Answer.get_answer(q.pk, student)
                 q.img = obj.img
             except:
                 print 'no obj found'
 
     exercise.submission_code = exercise.submission_code(request.proxyUser)
-    my_dict = {'course': course,
-               'exercise': exercise,
-               'questions': questions, 
+    my_dict = {
+        'course': course,
+        'exercise': exercise,
+        'questions': questions, 
     }
 
 
@@ -241,7 +258,7 @@ def grades(request):
     for c in courses:
         c.students = []
         for s in c.student_list: 
-            username = s.username
+            fullname = s.get_full_name
             if c.get_group(s):
                 group = c.get_group(s).name
             else:
@@ -249,7 +266,7 @@ def grades(request):
             exercises = []
             for e in c.exercises:
                 try: 
-                    e.grade = Submission.objects.get(exercise=e,student=s).grade
+                    e.grade = Submission.get_submission(e,s).grade
                 except:
                     e.grade = ''
                 exercises.append({
@@ -257,7 +274,7 @@ def grades(request):
                     'grade': e.grade,
                 })
             c.students.append({
-                'username': username,
+                'fullname': fullname,
                 'group': group,
                 'exercises': exercises,
             })
@@ -280,9 +297,10 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
                 s = f.save(commit=False)
                 if s.grade:
                     s.state = 'C'
-                    s.datetime_corrected = datetime.datetime.now()
+                    s.datetime_corrected = now
                 else:
                     s.state = 'S'
+                s.examiner = request.user
                 s.save()
                 return redirect('examiner_index')
     else:
@@ -292,7 +310,7 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
     
    
     for s in submissions:
-        group = Course.objects.get(code=course_code).get_group(s.student)
+        group = Course.get_course(course_code).get_group(s.student)
         if group:
             group_name = group.name
             group_pk = group.pk
@@ -302,7 +320,7 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
         res.append({
             'exercise_number': s.exercise.number,
             'exercise_id': s.exercise.pk,
-            'username': s.student.username,
+            'student_fullname': s.student.get_full_name,
             'user_id': s.student.pk,
             'grade': s.grade,
             'group_name': group_name,
@@ -313,7 +331,7 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
     for f in formset:
         f.exercise_number = res[i].get('exercise_number')
         f.exercise_id = res[i].get('exercise_id')
-        f.username = res[i].get('username')
+        f.student_fullname = res[i].get('student_fullname')
         f.user_id = res[i].get('user_id')
         f.group_name = res[i].get('group_name')
         f.group_pk = res[i].get('group_pk')
@@ -337,7 +355,7 @@ def answer(request, exercise_id, user_id):
     context = RequestContext(request)
     exercise = Exercise.objects.get(pk=exercise_id)
     student = User.objects.get(pk=user_id)
-    submission = Submission.objects.get(exercise__pk=exercise_id, student__pk=user_id)
+    submission = Submission.get_submission(exercise, student)
     
     try:
         course.group = exercise.course.get_group(student).name
@@ -347,7 +365,7 @@ def answer(request, exercise_id, user_id):
     questions = exercise.questions
     for q in questions:
         try:
-            obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+            obj = Answer.get_answer(q,student)
             q.answer = obj.answer
             q.img = obj.img
         except:
@@ -359,10 +377,11 @@ def answer(request, exercise_id, user_id):
             new_submission = form.save(commit=False)
             grade = request.POST.get('grade', None)
             if grade:
-                new_submission.datetime_corrected = datetime.datetime.now()
+                new_submission.datetime_corrected = now
                 new_submission.state = 'C'
             else:
                 new_submission.state = 'S'
+            new_submission.examiner = request.user
             new_submission.save()
             return redirect('examiner_index')
     else:
@@ -388,7 +407,7 @@ class AnswerPDFView(PDFTemplateView):
         exercise = Exercise.objects.get(pk=exercise_id)
         student = User.objects.get(pk=user_id)
     
-        submission = Submission.objects.get(exercise=exercise,student=student)
+        submission = Submission.get_submission(exercise,student)
         try:
             course.group = exercise.course.get_group(student).name
         except:
@@ -397,7 +416,7 @@ class AnswerPDFView(PDFTemplateView):
         questions = exercise.questions
         for q in questions:
             try:
-                obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+                obj = Answer.get_answer(q,student)
                 q.answer = obj.answer
                 q.img = obj.img
             except:
@@ -452,7 +471,7 @@ def answers_view(request):
                 student = User.objects.get(pk=user_id)
                 print 'student_id', student
             
-                submission = Submission.objects.get(exercise=exercise,student=student)
+                submission = Submission.get_submission(exercise,student)
                 try:
                     course.group = exercise.course.get_group(student).name
                 except:
@@ -461,7 +480,7 @@ def answers_view(request):
                 questions = exercise.questions
                 for q in questions:
                     try:
-                        obj = Answer.objects.get(question_id=q.pk,student_id=student.pk)
+                        obj = Answer.get_answer(q,student)
                         q.answer = obj.answer
                         q.img = obj.img
                     except:

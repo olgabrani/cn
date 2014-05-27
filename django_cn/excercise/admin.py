@@ -17,7 +17,7 @@ class ExerciseAdmin(admin.ModelAdmin):
     ]
 
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ('exercise', 'student','state', 'grade')
+    list_display = ('exercise', 'student','state', 'grade', 'examiner')
 
 admin.site.register(Application)
 admin.site.register(Course, CourseAdmin)

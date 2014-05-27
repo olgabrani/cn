@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% block main %}
-    {% for course in request.proxyUser.enrolled_courses %}
+    {% for course in courses %}
         {% include '_course_title.html' %}
         {% include '_exercises_table.html' %}        
     {% empty %}
-        Δεν έχεις γραφτεί σε κάποιο μάθημα
+        <p>Δεν έχεις γραφτεί σε κάποιο μάθημα</p>
     {% endfor %}
     {{APP.info|safe}}
 {% endblock main %}
