@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory
-from excercise.models import Submission, Answer
+from excercise.models import Submission, Answer, Grade
 
 class SubmissionForm(ModelForm):
     
@@ -10,6 +10,16 @@ class SubmissionForm(ModelForm):
         fields = ['grade']
 
 SubmissionFormSet = modelformset_factory(Submission, form=SubmissionForm, extra=0)
+
+class GradeForm(ModelForm):
+    
+    class Meta:
+        model = Grade
+        exclude = ['course', 'student']
+
+GradeFormSet = modelformset_factory(Grade, form=GradeForm, extra=0)
+
+
 
 class AnswerTextForm(ModelForm):
     

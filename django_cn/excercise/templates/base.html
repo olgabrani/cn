@@ -23,7 +23,7 @@
                 <div class="small-7 column rt">
                     {% block header_user %}
                         {% if user.is_authenticated %}
-                            <p>Καλωσήρθες <strong>{{ user.get_full_name }}</strong> <a href="{% url 'excercise.views.custom_logout' %}">(έξοδος)</a></p>
+                            <p>Καλωσήρθες <strong>{{ request.proxyUser.moodle_fullname }}</strong> <a href="{% url 'excercise.views.custom_logout' %}">(έξοδος)</a></p>
                         {% endif %}
                     {% endblock header_user %}
                     {% block menu %}{% endblock menu %}

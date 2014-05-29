@@ -13,7 +13,7 @@
                 {% if course.group %}<th>Ομάδα</th>{% endif %}
             </tr>
             <tr>
-                <td>{{request.proxyUser.username}}</td>
+                <td>{{request.proxyUser.moodle_fullname}}</td>
                 <td>{{exercise.number}}</td>
                 <td>{{course.school_year}}</td>
                 {% if course.group %}<td>{{course.group}}</td>{% endif %}

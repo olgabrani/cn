@@ -108,6 +108,8 @@ AUTH_LDAP_USER_ATTR_MAP = {
 
 STUDENT_ROLE_ID = 5
 EXAMINER_ROLE_ID = 4 
+TEACHER_ROLE_ID = 3
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 

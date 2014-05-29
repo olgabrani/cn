@@ -63,14 +63,17 @@ class Course(models.Model):
         return self.exercise_set.filter(is_active=True)
     
     @property
-    def get_groups(self):
-        
+    def moodle_course_id(self):
         try: 
             courseid = MdlCourse.objects.using('users').get(shortname=self.code).pk
         except:
             courseid = None
+        return courseid
+    
 
-        groups = MdlGroups.objects.using('users').filter(courseid=courseid)
+    @property
+    def get_groups(self):
+        groups = MdlGroups.objects.using('users').filter(courseid=self.moodle_course_id)
         return groups
     
     @property
@@ -90,6 +93,25 @@ class Course(models.Model):
     def student_list(self):
         return User.objects.filter(submission=self.submissions).select_related().distinct()
 
+    # course teachers are found through moodle enrolements
+    @property
+    def teachers(self):
+        moodle_course_id = self.moodle_course_id
+        mdl_enrol = MdlEnrol.objects.using('users').filter(courseid=moodle_course_id)
+        enrolid = []
+        for m in mdl_enrol:
+            enrolid.append(m.pk)
+        userenrolements = MdlUserEnrolments.objects.using('users').filter(enrolid__in=enrolid)
+        users = []
+        for u in userenrolements:
+            if u.is_teacher:
+                users.append(u.userid)
+        teachers = MdlUser.objects.using('users').filter(pk__in=users)
+        res = []
+        for t in teachers:
+            res.append(t.fullname)
+        return res
+
     # Returns all active courses
     @classmethod
     def active_courses(cls):
@@ -99,6 +121,16 @@ class Course(models.Model):
     @classmethod
     def get_course(cls,code):
         return cls.active_courses().get(code=code)
+
+
+    def is_course_teacher(self, moodle_user):
+        userid = moodle_user.pk
+        contextid = MdlContext.objects.using('users').filter(instanceid=self.moodle_course_id)
+        try:
+            res = MdlRoleAssignments.objects.using('users').get(contextid__in=contextid, roleid=settings.TEACHER_ROLE_ID, userid=userid)
+            return True
+        except:
+            return False
 
 
     def get_group(self, user):
@@ -248,6 +280,20 @@ class Submission(models.Model):
     def __unicode__(self):
         return self.student.username
 
+class Grade(models.Model):
+
+    course = models.ForeignKey(Course)
+    student = models.ForeignKey(User)
+    datetime_submitted = models.DateTimeField(auto_now=True)
+    grade = models.CharField(max_length=2, null=True, blank=True)
+    examiner = models.ForeignKey(User, related_name="grades_examiner",null=True, blank=True)
+
+    @classmethod
+    def get_or_create_grade(cls,course,student):
+        return cls.objects.get_or_create(course=course,student=student)
+    
+    def __unicode__(self):
+        return "%s (%s) Grade: %s" % (self.student, self.course, self.grade) 
 
 class MdlUser(models.Model):
     confirmed = models.IntegerField()
@@ -263,6 +309,9 @@ class MdlUser(models.Model):
     def is_enrolled(self, course_code):
         return self.username
    
+    @property
+    def fullname(self):
+        return "%s %s" % (self.firstname, self.lastname)
 
     class Meta:
         managed = False
@@ -295,7 +344,6 @@ class MdlUserEnrolments(models.Model):
             c_ids.append(c.pk)
         try: 
             r = MdlRoleAssignments.objects.using('users').get(roleid=role_id,contextid__in=c_ids, userid=self.userid)
-            print role_id
             return True
         except:
             return False
@@ -306,8 +354,13 @@ class MdlUserEnrolments(models.Model):
     
     @property
     def is_examiner(self):
-        return self.is_role(settings.EXAMINER_ROLE_ID)
+        return self.is_role(settings.EXAMINER_ROLE_ID) or self.is_role(settings.TEACHER_ROLE_ID)
+    
+    @property
+    def is_teacher(self):
+        return self.is_role(settings.TEACHER_ROLE_ID)
        
+  
     class Meta:
         managed = False
         db_table = 'mdl_user_enrolments'
@@ -362,6 +415,10 @@ class ProxyUser(User):
     @property
     def is_moodle_user(self):
         return MdlUser.objects.using('users').get(username=self.username)
+
+    @property
+    def moodle_fullname(self):
+        return self.is_moodle_user.fullname
     
     def enrolled_courses_role(self, role):
         if self.is_moodle_user:
@@ -377,6 +434,7 @@ class ProxyUser(User):
             enrolled_courses = Course.objects.filter(code__in=course_codes, is_active=True)
             for e in enrolled_courses:
                 e.group = e.get_group(self)
+                e.user_is_course_teacher = e.is_course_teacher(self.is_moodle_user)
             return enrolled_courses
 
     

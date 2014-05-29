@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from excercise.models import Course, Exercise, Question, Submission, Application
+from excercise.models import Course, Exercise, Question, Submission, Application, Grade
 from parsing.models import Parse
+
+class GradeAdmin(admin.ModelAdmin):
+    list_display = ('student', 'course', 'examiner', 'grade' )
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'is_active')
@@ -20,6 +23,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('exercise', 'student','state', 'grade', 'examiner')
 
 admin.site.register(Application)
+admin.site.register(Grade, GradeAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Exercise, ExerciseAdmin)
 admin.site.register(Submission, SubmissionAdmin)

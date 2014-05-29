@@ -11,8 +11,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm, AnswerTextForm, AnswerImageForm
-from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer, Question
+from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm, AnswerTextForm, AnswerImageForm, GradeFormSet
+from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer, Question, Grade
 from excercise.models import submission_list
 from easy_pdf.views import PDFTemplateView
 from easy_pdf.rendering import render_to_pdf_response
@@ -21,10 +21,21 @@ now = datetime.datetime.utcnow().replace(tzinfo=utc)
 
 def is_examiner(user):
     # Can be used as a decoreator @user_passes_test(is_examiner)
-    return user.groups.filter(name='examiner')
+    return user.groups.filter(name__in=['examiner','teacher'])
+
+def is_teacher(user):
+    # Can be used as a decoreator @user_passes_test(is_teacher)
+    return user.groups.filter(name='teacher')
+
 
 def slicedict(d, s):
     return {k:v for k,v in d.iteritems() if k.startswith(s)}
+
+# as dirty as hell...
+def get_moodle_fullname(user):
+    moodle_user = MdlUser.objects.using('users').get(username=user.username)
+    return moodle_user.fullname
+    
 
 @login_required
 def index(request):
@@ -141,7 +152,6 @@ def exercise(request, course_code, exercise_number):
             t = k.split('-',2)
             question_pk = t[1]
             student_pk = t[2]
-            print img, '!!!!!'
             try:
                 instance = Answer.get_answer(question_pk, student)
                 form = AnswerImageForm({'question':question_pk, 'student': student_pk},{'img': img}, instance=instance)
@@ -168,14 +178,14 @@ def exercise(request, course_code, exercise_number):
                 obj = Answer.get_answer(q.pk, student)
                 q.value = obj.answer
             except:
-                print 'no obj found'
+                print 'no answer found for this question'
         if q.answer_type == 'I':
             q.field_name = 'qi-%d-%d' %(q.pk, student.pk)
             try:
                 obj = Answer.get_answer(q.pk, student)
                 q.img = obj.img
             except:
-                print 'no obj found'
+                print 'no answer found for this question'
 
     exercise.submission_code = exercise.submission_code(request.proxyUser)
     my_dict = {
@@ -255,10 +265,12 @@ def grades(request):
     
     context = RequestContext(request)
     courses = request.proxyUser.enrolled_courses_examiner
+    j=0
     for c in courses:
-        c.students = []
+        students = []
         for s in c.student_list: 
-            fullname = s.get_full_name
+            obj, created = Grade.get_or_create_grade(c,s)
+            fullname = get_moodle_fullname(s)
             if c.get_group(s):
                 group = c.get_group(s).name
             else:
@@ -273,11 +285,29 @@ def grades(request):
                     'number': e.number,
                     'grade': e.grade,
                 })
-            c.students.append({
+            students.append({
                 'fullname': fullname,
                 'group': group,
                 'exercises': exercises,
             })
+        grades = Grade.objects.filter(course=c, student__in=c.student_list)
+        c.button_name= "save%d" %j
+        if request.method == 'POST' and c.button_name in request.POST:
+            formset = GradeFormSet(request.POST, queryset=grades)
+            if formset.is_valid():
+                for f in formset:
+                    s = f.save(commit=False)
+                    s.examiner = request.proxyUser
+                    s.save()
+        formset = GradeFormSet(queryset=grades)
+        j=j+1
+        i = 0
+        for f in formset:
+            f.fullname = students[i].get('fullname')
+            f.group = students[i].get('group')
+            f.exercises = students[i].get('exercises')
+            i = i+1
+        c.formset = formset
 
     return render_to_response('examiner/grades.html',{'courses': courses,}, context)
 
@@ -320,7 +350,7 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
         res.append({
             'exercise_number': s.exercise.number,
             'exercise_id': s.exercise.pk,
-            'student_fullname': s.student.get_full_name,
+            'student_fullname': get_moodle_fullname(s.student),
             'user_id': s.student.pk,
             'grade': s.grade,
             'group_name': group_name,
@@ -356,6 +386,7 @@ def answer(request, exercise_id, user_id):
     exercise = Exercise.objects.get(pk=exercise_id)
     student = User.objects.get(pk=user_id)
     submission = Submission.get_submission(exercise, student)
+    student_fullname = get_moodle_fullname(student)
     
     try:
         course.group = exercise.course.get_group(student).name
@@ -392,6 +423,7 @@ def answer(request, exercise_id, user_id):
         'submission': submission,
         'form': form,
         'student': student,
+        'student_fullname': student_fullname,
         'group': course.group,
     }
     return render_to_response('examiner/exercise.html', my_dict , context)
@@ -406,6 +438,7 @@ class AnswerPDFView(PDFTemplateView):
         
         exercise = Exercise.objects.get(pk=exercise_id)
         student = User.objects.get(pk=user_id)
+        student_fullname = get_moodle_fullname(student)
     
         submission = Submission.get_submission(exercise,student)
         try:
@@ -428,6 +461,7 @@ class AnswerPDFView(PDFTemplateView):
             'exercise': exercise,
             'questions': questions,
             'student': student,
+            'student_fullname': student_fullname,
             'group': course.group,
             'submission': submission,
         })
@@ -469,7 +503,7 @@ def answers_view(request):
             try:
                 exercise = Exercise.objects.get(pk=exercise_id)
                 student = User.objects.get(pk=user_id)
-                print 'student_id', student
+                student_fullname = get_moodle_fullname(student)
             
                 submission = Submission.get_submission(exercise,student)
                 try:
@@ -491,6 +525,7 @@ def answers_view(request):
                     'exercise': exercise,
                     'questions': questions,
                     'student': student,
+                    'student_fullname': student_fullname,
                     'group': course.group,
                     'submission': submission,
                 })

@@ -5,6 +5,8 @@
     <h6>Ακαδημαϊκό έτος: {{c.school_year}}</h6>
     <h4>{{c.name}}</h4>
 </section>
+<form action="" method="POST">{% csrf_token %}
+{{ c.formset.management_form }}
 <table class="default">
     <tr>
         <th>Name</th>
@@ -12,18 +14,25 @@
         {% for e in c.exercises %}
             <th>Exercise {{e.number}}</th>
         {% endfor %}
+        <th>Final Grade</th>
     </tr>
-    {% for s in c.students %}
+    {% for f in c.formset %}
+    {{f.id}}
     <tr>
-        <td>{{s.fullname}}</td>
-        <td>{{s.group}}</td>
-        {% for e in s.exercises %}
+        <td>{{f.fullname}}</td>
+        <td>{{f.group}}</td>
+        {% for e in f.exercises %}
             <td>{{e.grade}}</td>
         {% endfor %}
+        <th>{{f.grade}}</th>
     </tr>
     {% endfor %}
 
 </table>
-    {% endfor %}
+{% if c.user_is_course_teacher %}
+<button type="submit" value="save" name="{{c.button_name}}">Αποθήκευση τελικής βαθμολογίας</button>
+{% endif %}
+</form>
+{% endfor %}
 {% endblock main %}
 
