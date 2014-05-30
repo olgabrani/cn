@@ -535,5 +535,22 @@ def answers_view(request):
     return render_to_pdf_response(request, "pdf_answer.html", context, 'answers', "utf-8")
 
 
-
-
+# ajax view to delete image
+@login_required
+def delete_image(request):
+    context = RequestContext(request)
+    if request.method == 'GET':
+        question_id = request.GET['question_id']
+        user_id = request.user.pk
+    image_deleted = False
+    try:
+        q = Answer.get_answer(question_id, user_id)
+        if q.img:
+            q.img.delete()
+            image_deleted = True
+        else:
+            print 'oxi image'
+        return HttpResponse(image_deleted)
+    except:
+        print 'no image found to be deleted'
+        return HttpResponse(image_deleted)

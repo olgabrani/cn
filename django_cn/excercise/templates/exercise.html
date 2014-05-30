@@ -40,7 +40,11 @@
                     {% elif q.answer_type == "I" %}
                         <label for="file">{{ q.order }} Απάντηση</label>
                         <input type="file" name="{{q.field_name}}" accept="image/*"  />
-                        {% if q.img %}<img src="{{q.img.url}}"/>{% endif %}
+                        {% if q.img %}
+                            <a href="javascript:void(0)" class="delete-img" data-question="{{q.pk}}" style="float:left; margin: 0 10px 10px 0;" title="The image will be deleted for this submission">delete image</a>
+                            <img src="{{q.img.url}}"/>
+                        {% endif %}
+
                     {% endif %}
                 
                 </div>

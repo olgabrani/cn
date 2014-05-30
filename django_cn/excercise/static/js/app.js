@@ -105,7 +105,24 @@ $(document).ready(function(){
         e.preventDefault();
     });
 
+    $('.delete-img').click(function(){
+        var question_id = $(this).attr('data-question');
+        var user_id = $(this).attr('data-user');
+        var send_data = {
+            'question_id': question_id,
+        }
+        var that = $(this)
+        $.ajax({
+            type: "GET",
+            url: "/excercise/delete_image/",
+            data: send_data,
+        }).done(function( msg ) {
+            console.log(msg);
+            that.siblings('img').remove();
+            that.remove();
+        });
 
+    });
 });
 
 

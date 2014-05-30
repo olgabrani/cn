@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'excercise',
     'parsing',
     'easy_pdf',
+    'django_cleanup',
 )
 
 MIDDLEWARE_CLASSES = (

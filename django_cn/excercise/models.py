@@ -244,8 +244,11 @@ class Answer(models.Model):
 
     @classmethod
     def get_answer(cls,question,student):
-        return cls.objects.get(question=question, student=student)
-
+        try:
+            ans = cls.objects.get(question=question, student=student)
+            return ans
+        except:
+            return ''
 
     def __unicode__(self):
         return self.question.order+' Student: ' +self.student.username
