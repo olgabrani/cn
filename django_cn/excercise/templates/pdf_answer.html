@@ -35,7 +35,8 @@
                 </tr>
             </table>
             {% for q in r.questions %}
-                <p><strong>{{q.order}}</strong></p>
+                <p>
+                    <strong>{{q.order}}</strong>
                 {% if q.answer_type == 'T' %}
                     {{q.answer}}
                 {% endif %}
@@ -44,6 +45,7 @@
                         <img src="{{q.img.url}}">
                     {%  endif%}
                 {% endif %}
+                </p>
             {% endfor %}
             <hr>
         {% endfor %}
