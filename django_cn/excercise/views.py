@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+from django.views.decorators.csrf import ensure_csrf_cookie
 from excercise.forms import SubmissionForm, SubmissionFormSet, StudentSubmissionForm, AnswerTextForm, AnswerImageForm, GradeFormSet
 from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolments, ProxyUser, Submission, Answer, Question, Grade
 from excercise.models import submission_list
@@ -398,7 +399,10 @@ def answer(request, exercise_id, user_id):
         try:
             obj = Answer.get_answer(q,student)
             q.answer = obj.answer
-            q.img = obj.img
+            if obj.img:
+                q.img_tag = "<img src='%s'>" % obj.img.url
+            else:
+                q.img_tag = ''
         except:
             q.answer = 'No answer'
 
@@ -537,10 +541,11 @@ def answers_view(request):
 
 # ajax view to delete image
 @login_required
+@ensure_csrf_cookie
 def delete_image(request):
     context = RequestContext(request)
-    if request.method == 'GET':
-        question_id = request.GET['question_id']
+    if request.method == 'POST':
+        question_id = request.POST['question_id']
         user_id = request.user.pk
     image_deleted = False
     try:
@@ -554,3 +559,20 @@ def delete_image(request):
     except:
         print 'no image found to be deleted'
         return HttpResponse(image_deleted)
+
+# ajax view to add a suggested answer
+@login_required
+@ensure_csrf_cookie
+def set_suggested_answer(request):
+    msg = False
+    context = RequestContext(request)
+    if request.method == 'POST':
+        question_id = request.POST['question_id']
+        text = request.POST['text']
+        a = Question.get_question(question_id)
+        a.suggested_answer = text
+        a.save()
+        msg = True
+    print msg, 'MEASS'
+    return HttpResponse(msg)
+    

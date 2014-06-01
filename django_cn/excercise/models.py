@@ -233,6 +233,15 @@ class Question(models.Model):
     answer_type = models.CharField(max_length=1, choices=ANSWER_TYPE_CHOICES,default='T')
     exercise = models.ForeignKey(Exercise)
     
+    @classmethod
+    def get_question(cls,question_id):
+        try:
+            q = cls.objects.get(pk=question_id)
+            return q
+        except:
+            return ''
+
+
     def __unicode__(self):
         return self.text[0:256]
 

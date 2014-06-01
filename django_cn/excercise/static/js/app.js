@@ -104,22 +104,42 @@ $(document).ready(function(){
     $('.qa textarea').bind("paste",function(e) {
         e.preventDefault();
     });
-
     $('.delete-img').click(function(){
         var question_id = $(this).attr('data-question');
         var user_id = $(this).attr('data-user');
         var send_data = {
             'question_id': question_id,
-        }
-        var that = $(this)
+        };
+        var that = $(this);
         $.ajax({
-            type: "GET",
+            type: "POST",
             url: "/excercise/delete_image/",
             data: send_data,
         }).done(function( msg ) {
             console.log(msg);
             that.siblings('img').remove();
             that.remove();
+        });
+
+    });
+
+    $('.answer .star').click(function(e){
+        e.preventDefault();
+        var question_id = $(this).attr('data-question');
+        var text = $(this).siblings('div').html();
+        var send_data = {
+            'question_id': question_id,
+            'text': text,
+        };
+        var that = $(this);
+        $.ajax({
+            type: "POST",
+            url: "/excercise/set_suggested_answer/",
+            data: send_data,
+        }).done(function( msg ) {
+            if (msg) {
+                that.addClass('selected')
+            }
         });
 
     });

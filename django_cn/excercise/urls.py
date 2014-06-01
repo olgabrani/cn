@@ -18,4 +18,5 @@ urlpatterns = patterns('',
         url(r'^pdf-answer/(?P<exercise_id>\d+)/(?P<user_id>\d+)/?$', AnswerPDFView.as_view(), name='pdf_answer'),
         url(r'^pdf-answers/$', views.answers_view, name='pdf_answers'),
         url(r'^delete_image/$', views.delete_image, name='delete_image'),
+        url(r'^set_suggested_answer/$', views.set_suggested_answer, name='set_suggested_answer'),
     )
