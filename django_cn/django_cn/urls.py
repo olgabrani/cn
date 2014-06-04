@@ -11,7 +11,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^admin/filebrowser/', include(site.urls)),
     url(r'^grappelli/', include('grappelli.urls')),
-    url(r'^excercise/', include('excercise.urls')), 
+    url(r'^assignments/', include('excercise.urls')), 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/login/$',  custom_login),
     url(r'^accounts/logout/$', custom_logout ),

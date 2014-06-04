@@ -12,9 +12,6 @@ TEMPLATE_DIRS = (
 )
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'secret_key'
 
@@ -62,8 +59,6 @@ ROOT_URLCONF = 'django_cn.urls'
 WSGI_APPLICATION = 'django_cn.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -82,7 +77,7 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'el-gr'
 
 TIME_ZONE = 'UTC'
 
@@ -136,11 +131,14 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "excercise.context_processors.application",
 )
 
-USER_LOGIN_REDIRECT_URL = '/excercise/'
-EXAMINER_LOGIN_REDIRECT_URL = '/excercise/examiner/'
+USER_LOGIN_REDIRECT_URL = '/assignments/'
+EXAMINER_LOGIN_REDIRECT_URL = '/assignments/examiner/'
 GRAPPELLI_ADMIN_TITLE = 'CN admin'
+
+FONT_PATH = "/home/user/DejaVuSansMono.ttf"
 
 try:
     from local_settings import *
 except ImportError as e:
     pass
+
