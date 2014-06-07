@@ -116,21 +116,26 @@ def exercise(request, course_code, exercise_number):
     questions = exercise.questions
     student = request.user
     
-    try:
-        submission = Submission.get_submission(exercise,student)
+    submission, created = Submission.get_or_create_submission(exercise,student)
         
-        if request.method == 'POST':
-            form = StudentSubmissionForm(request.POST, instance=submission)
-            if form.is_valid():
-                new_submission = form.save(commit=False)
-    except:
-        if request.method == 'POST':
-            form = StudentSubmissionForm(request.POST)
-            if form.is_valid():
-                new_submission = form.save(commit=False)
-                new_submission.student = student
-                new_submission.exercise = exercise
-    
+    if request.method == 'POST':
+        s_form = StudentSubmissionForm(request.POST, instance=submission)
+    else:
+        s_form = StudentSubmissionForm(instance=submission)
+
+    if s_form.is_valid():
+        new_submission = s_form.save(commit=False)
+        new_submission.calculated_ip = request.META['REMOTE_ADDR']
+        if 'save' in request.POST.keys():
+            new_submission.state = 'I'
+            new_submission.save()
+        else:
+            new_submission.state = 'C'
+            new_submission.datetime_submitted = now
+            new_submission.save()
+            return redirect('index')
+
+  
     if request.method == 'POST':
         q_dict = slicedict(request.POST, 'q-')
         for k, v in q_dict.iteritems():
@@ -163,15 +168,6 @@ def exercise(request, course_code, exercise_number):
 
 
 
-        if 'save' in request.POST.keys():
-            new_submission.state = 'I'
-            new_submission.save()
-        else:
-            new_submission.state = 'C'
-            new_submission.datetime_submitted = now
-            new_submission.save()
-            return redirect('index')
-
     for q in questions:
         if q.answer_type == 'T':
             q.field_name = 'q-%d-%d' %(q.pk, student.pk)
@@ -193,6 +189,7 @@ def exercise(request, course_code, exercise_number):
         'course': course,
         'exercise': exercise,
         'questions': questions, 
+        'form': s_form,
     }
 
 

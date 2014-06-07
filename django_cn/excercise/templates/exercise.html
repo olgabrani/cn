@@ -23,7 +23,27 @@
     </section>
     <section class="qas">
         <form method="post" action="" enctype="multipart/form-data" id="exercise-submit">{% csrf_token %}
-            {% for q in questions %} 
+            <fieldset>
+                <legend>Πληροφορίες</legend>
+                <div class="small-6">
+                {% for field in form %}
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label for="id_{{field.name}}" class="right inline">{{field.label}}</label>
+                        </div>
+                        <div class="small-9 columns">
+                            {{field}}
+                            {% if field.errors %}
+                                {% for e in field.errors %}
+                                    <small class="error">{{e}}</small>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </fieldset>
+            <h5><strong>Ερωτήσεις</strong></h5>
+{% for q in questions %} 
                 <div class="qa">
 
                     {% if q.answer_type == "E" %}

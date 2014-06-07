@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.forms import ModelForm
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory
@@ -37,4 +38,9 @@ class StudentSubmissionForm(ModelForm):
     
     class Meta:
         model = Submission
-        fields = []
+        fields = ['ip', 'mac_address', 'comments']
+        labels = {
+            'ip': 'IP',
+            'mac_address': 'MAC address',
+            'comments': 'Σχόλια',
+        }

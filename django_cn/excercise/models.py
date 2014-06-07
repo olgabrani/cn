@@ -18,7 +18,7 @@ mac_re = re.compile(MAC_RE)
 
 class MACAddressFormField(fields.RegexField):
     default_error_messages = {
-        'invalid': _(u'Enter a valid MAC address.'),
+        'invalid': _(u'Eισάγετε μια έγκυρη MAC address.'),
     }
     
     def __init__(self, *args, **kwargs):
@@ -329,6 +329,11 @@ class Submission(models.Model):
     @classmethod
     def get_submission(cls, exercise, student):
         return cls.objects.get(exercise=exercise, student=student)
+    
+    @classmethod
+    def get_or_create_submission(cls, exercise, student):
+        return cls.objects.get_or_create(exercise=exercise, student=student)
+
 
     def __unicode__(self):
         return self.student.username
