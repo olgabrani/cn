@@ -215,7 +215,7 @@ def custom_login(request):
             print 'error'
     else:
         if request.method =='POST':
-            error = 'You have an error in your username/password combination or you are not registered to moodle'
+            error = 'You have an error in your username/password combination '
         return render_to_response('registration/login.html', {'error':error}, context)
 
 

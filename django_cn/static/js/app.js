@@ -113,7 +113,7 @@ $(document).ready(function(){
         var that = $(this);
         $.ajax({
             type: "POST",
-            url: "/excercise/delete_image/",
+            url: "/assignments/delete_image/",
             data: send_data,
         }).done(function( msg ) {
             console.log(msg);
@@ -134,7 +134,7 @@ $(document).ready(function(){
         var that = $(this);
         $.ajax({
             type: "POST",
-            url: "/excercise/set_suggested_answer/",
+            url: "/assignments/set_suggested_answer/",
             data: send_data,
         }).done(function( msg ) {
             if (msg) {

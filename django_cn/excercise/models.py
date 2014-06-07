@@ -1,10 +1,44 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import re
+from django.utils.translation import ugettext_lazy as _
 from datetime import datetime, date
+from django.forms import fields
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from filebrowser.fields import FileBrowseField
+
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^excercise\.models\.MACAddressField"])
+
+
+MAC_RE = r'^([0-9a-fA-F]{2}([:-]?|$)){6}$'
+mac_re = re.compile(MAC_RE)
+
+class MACAddressFormField(fields.RegexField):
+    default_error_messages = {
+        'invalid': _(u'Enter a valid MAC address.'),
+    }
+    
+    def __init__(self, *args, **kwargs):
+        super(MACAddressFormField, self).__init__(mac_re, *args, **kwargs)
+
+class MACAddressField(models.Field):
+    empty_strings_allowed = False
+                                    
+    def __init__(self, *args, **kwargs):
+        kwargs['max_length'] = 17
+        super(MACAddressField, self).__init__(*args, **kwargs)
+    
+    def get_internal_type(self):
+        return "CharField"
+
+    def formfield(self, **kwargs):
+        defaults = {'form_class': MACAddressFormField}
+        defaults.update(kwargs)
+        return super(MACAddressField, self).formfield(**defaults)
+
 
 def submission_list(course_code=None, exercise_number=None, group_id=None, filtering=None):
     if filtering == 'corrected':
@@ -278,7 +312,14 @@ class Submission(models.Model):
     state = models.CharField(max_length=1, choices = SUBMISSION_STATE, default='I')
     grade = models.CharField(max_length=2, null=True, blank=True)
     examiner = models.ForeignKey(User, related_name="submission_examiner",null=True, blank=True)
-
+    #ip is the IP claimed by the user
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    #calculated_ip is the IP automattically inserted upon submission
+    calculated_ip = models.GenericIPAddressField(null=True, blank=True)
+    mac_address = MACAddressField(null=True, blank=True)
+    comments = models.TextField(null=True, blank=True)
+    
+    
     @property
     def group_id(self):
         userid = MdlUser.objects.using('users').get(username=self.student.username).pk

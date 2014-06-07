@@ -2,7 +2,7 @@
 {% block header_user %}{% endblock header_user %}
 {% block menu %}{% endblock menu %}
 {% block main %}
-<div class="small-6 large-centered columns panel">
+<div class="small-6 small-centered columns panel">
     <h3>Login</h3>
     <form method="post" action="{% url 'excercise.views.custom_login' %}">
      {% csrf_token %}
