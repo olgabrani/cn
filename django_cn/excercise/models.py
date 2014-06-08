@@ -78,9 +78,16 @@ class Application(models.Model):
     def __unicode__(self):
         return self.title
 
+
 class Course(models.Model):
+    
+    SEMESTERS = (
+        ('E', 'Easter'),
+        ('W', 'Winter'),
+    )
     name = models.CharField(max_length=128)
     code = models.CharField(max_length=64)
+    semester = models.CharField(max_length=1, choices=SEMESTERS, default='E')
     is_active = models.BooleanField(default=True)
 
     @property
@@ -90,7 +97,11 @@ class Course(models.Model):
         except:
             year = date.today().year
         next_year = year+1
-        return '%d-%d' % (year, next_year)
+        last_year = year-1
+        if self.semester == 'E':
+           return '%d-%d' % (last_year, year)
+        else:
+           return '%d-%d' % (year, next_year)
    
     @property
     def exercises(self):
@@ -144,7 +155,7 @@ class Course(models.Model):
         res = []
         for t in teachers:
             res.append(t.fullname)
-        return res
+        return ', '.join(res)
 
     # Returns all active courses
     @classmethod
@@ -233,7 +244,7 @@ class Exercise(models.Model):
 
     def submission_state(self, user):
 
-        dict = {'I': 'Ημιτελής', 'C': 'Διορθωμένη', 'S': 'Υπεβλήθη'}
+        dict = {'I': 'Ημιτελής', 'C': 'Υπεβλήθη', 'S': 'Υπεβλήθη'}
         try:
             submission_obj = Submission.objects.get(exercise = self, student=user).state
             submission = dict.get(submission_obj)

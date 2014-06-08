@@ -7,9 +7,7 @@
         {{course.name}}
         {% if has_course_link %}</a>{% endif %}
         <br><span>
-        {% for t in course.teachers %}
-            {{t}}
-        {% endfor %}
+        {{course.teachers}}
         </span>
         <br> <span><strong>{{course.group_name}}</strong> </span>
     </h4>

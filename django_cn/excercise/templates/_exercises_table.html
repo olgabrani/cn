@@ -11,13 +11,13 @@
     <tr>
         <td>{{ exercise.number }}</td>
         <td>{{ exercise.title }}</td>
-        <td>
+        <td class="status">
             {% if exercise.has_submission_link %}
             <a href="{% url 'exercise' course.code exercise.number %}">
                 {{ exercise.submission_state}}
             </a>
             {% else %}
-                {{ exercise.submission_state}}
+                <span>✓</span>{{ exercise.submission_state}}
             {% endif %}
         </td>
         <td><a href="{{exercise.document.url}}">PDF</a></td>
