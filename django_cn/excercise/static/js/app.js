@@ -82,14 +82,17 @@ $(document).ready(function(){
         e.preventDefault();
         $('#unanswered').foundation('reveal','open');
         var cnt = 0;
-        $('#exercise-submit').find('textarea').each(function(){
-           if( this.value == ''){
-                cnt++;
+        $('#exercise-submit').find('.qa textarea').each(function(){
+           if( this.value.trim() == ''){
+                cnt = cnt+1;
             }
         }); 
         if (cnt > 0 ){
             var text = 'Δεν έχετε απαντήσει σε <strong>'+cnt+'</strong> ερωτήσεις.'
             $('#unanswered .lead span').html(text);
+        } else {
+        
+            $('#unanswered .lead span').html('');
         }
 
     });

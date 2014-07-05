@@ -18,9 +18,9 @@ SECRET_KEY = 'secret_key'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-TEMPLATE_DEBUG = True
+TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'parsing',
     'easy_pdf',
     'django_cleanup',
+    'django_extensions',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -136,9 +137,9 @@ EXAMINER_LOGIN_REDIRECT_URL = '/assignments/examiner/'
 GRAPPELLI_ADMIN_TITLE = 'CN admin'
 
 FONT_PATH = "/home/user/DejaVuSansMono.ttf"
+ALLOWED_NETWORKS = ['1.1.1.1']
 
 try:
     from local_settings import *
 except ImportError as e:
     pass
-

@@ -4,6 +4,7 @@ from django.utils.timezone import utc
 from django.conf import settings
 from django.shortcuts import render, render_to_response, redirect
 from django.http import HttpResponse, HttpResponseRedirect
+from django.http import Http404
 from django.template import RequestContext
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
@@ -17,6 +18,7 @@ from excercise.models import Course, Exercise, MdlUser, MdlCourse, MdlUserEnrolm
 from excercise.models import submission_list
 from easy_pdf.views import PDFTemplateView
 from easy_pdf.rendering import render_to_pdf_response
+from netaddr import IPNetwork, IPAddress
 
 now = datetime.datetime.utcnow().replace(tzinfo=utc)
 
@@ -46,6 +48,7 @@ def index(request):
     courses = student.enrolled_courses
     exercises = []
 
+   
     for c in courses:
         c.group_name = c.get_group_name(student)
         for e in c.exercises:
@@ -111,60 +114,84 @@ def exercise(request, course_code, exercise_number):
         course.group = course.get_group(request.proxyUser).name
     except:
         course.group = None
+   
+    try: 
+        exercise = Exercise.objects.get(course=course, number=exercise_number)
+    except:
+        raise Http404
     
-    exercise = Exercise.get_exercise(course,exercise_number)
+    #exercise = Exercise.get_exercise(course,exercise_number)
     questions = exercise.questions
     student = request.user
     
     submission, created = Submission.get_or_create_submission(exercise,student)
-        
+    
+    valid_ip = False
+    invalid_submission = False
+
+    for network in settings.ALLOWED_NETWORKS:
+        if IPAddress(request.META['REMOTE_ADDR']) in IPNetwork(network):
+            valid_ip = True
+        else:
+            invalid_submission = True
+
     if request.method == 'POST':
         s_form = StudentSubmissionForm(request.POST, instance=submission)
+        if 'save' in request.POST.keys():
+            valid_ip = True
+ 
     else:
         s_form = StudentSubmissionForm(instance=submission)
 
-    if s_form.is_valid():
+    if s_form.is_valid() and valid_ip:
         new_submission = s_form.save(commit=False)
         new_submission.calculated_ip = request.META['REMOTE_ADDR']
         if 'save' in request.POST.keys():
             new_submission.state = 'I'
             new_submission.save()
         else:
-            new_submission.state = 'C'
+            new_submission.state = 'S'
             new_submission.datetime_submitted = now
             new_submission.save()
-            return redirect('index')
+            #return redirect('index')
 
+        if request.method == 'POST':
+            q_dict = slicedict(request.POST, 'q-')
+            for k, v in q_dict.iteritems():
+                answer = v
+                t = k.split('-',2)
+                question_pk = t[1]
+                student_pk = t[2]
+                try:
+                    instance = Answer.get_answer(question_pk,student)
+                    form = AnswerTextForm({'question':question_pk, 'student': student_pk, 'answer': answer}, instance=instance)
+                except:
+                    form = AnswerTextForm({'question':question_pk, 'student': student_pk, 'answer': answer})
+                if form.is_valid():
+                    form.save()
+            
+            
+            qi_dict = slicedict(request.FILES, 'qi-')
+            for k, v in qi_dict.iteritems():
+                img = v
+                t = k.split('-',2)
+                question_pk = t[1]
+                student_pk = t[2]
+                try:
+                    instance = Answer.get_answer(question_pk, student)
+                    form = AnswerImageForm({'question':question_pk, 'student': student_pk},{'img': img}, instance=instance)
+                except:
+                    form = AnswerImageForm({'question':question_pk, 'student': student_pk}, {'img':img})
+                if form.is_valid():
+                    form.save()
+            if 'save' in request.POST.keys():
+                print 'saving'
+            else:
+                return redirect('index')
+
+    else:
+        print 'invalid IP'
   
-    if request.method == 'POST':
-        q_dict = slicedict(request.POST, 'q-')
-        for k, v in q_dict.iteritems():
-            answer = v
-            t = k.split('-',2)
-            question_pk = t[1]
-            student_pk = t[2]
-            try:
-                instance = Answer.get_answer(question_pk,student)
-                form = AnswerTextForm({'question':question_pk, 'student': student_pk, 'answer': answer}, instance=instance)
-            except:
-                form = AnswerTextForm({'question':question_pk, 'student': student_pk, 'answer': answer})
-            if form.is_valid():
-                form.save()
-        
-        
-        qi_dict = slicedict(request.FILES, 'qi-')
-        for k, v in qi_dict.iteritems():
-            img = v
-            t = k.split('-',2)
-            question_pk = t[1]
-            student_pk = t[2]
-            try:
-                instance = Answer.get_answer(question_pk, student)
-                form = AnswerImageForm({'question':question_pk, 'student': student_pk},{'img': img}, instance=instance)
-            except:
-                form = AnswerImageForm({'question':question_pk, 'student': student_pk}, {'img':img})
-            if form.is_valid():
-                form.save()
 
 
 
@@ -190,6 +217,7 @@ def exercise(request, course_code, exercise_number):
         'exercise': exercise,
         'questions': questions, 
         'form': s_form,
+        'invalid_submission': invalid_submission,
     }
 
 
@@ -272,7 +300,7 @@ def grades(request):
             if c.get_group(s):
                 group = c.get_group(s).name
             else:
-                None
+                group = None
             exercises = []
             for e in c.exercises:
                 try: 
@@ -330,7 +358,7 @@ def grading_list(request, course_code, exercise_number=None, group_id=None):
                     s.state = 'S'
                 s.examiner = request.user
                 s.save()
-                return redirect('examiner_index')
+            return redirect('examiner_index')
     else:
         formset = SubmissionFormSet(queryset=submissions)
     res = []

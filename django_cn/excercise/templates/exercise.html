@@ -19,15 +19,18 @@
                 {% if course.group %}<td>{{course.group}}</td>{% endif %}
             </tr>
         </table>
-        <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title}}</h3>
+        {% if invalid_submission %}
+        <div data-alert class="alert-box alert">You cannot submit your answer from this IP</div>
+        {% endif %}
+        <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title|safe}}</h3>
     </section>
     <section class="qas">
         <form method="post" action="" enctype="multipart/form-data" id="exercise-submit">{% csrf_token %}
             <fieldset>
                 <legend>Πληροφορίες</legend>
-                <div class="small-6">
+                <div class="small-12">
                 {% for field in form %}
-                    <div class="row">
+                    <div class="half-row">
                         <div class="small-3 columns">
                             <label for="id_{{field.name}}" class="right inline">{{field.label}}</label>
                         </div>

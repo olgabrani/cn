@@ -38,9 +38,10 @@ class StudentSubmissionForm(ModelForm):
     
     class Meta:
         model = Submission
-        fields = ['ip', 'mac_address', 'comments']
+        fields = ['ip', 'pc_name','mac_address', 'comments']
         labels = {
             'ip': 'IP',
             'mac_address': 'MAC address',
             'comments': 'Σχόλια',
+            'pc_name': 'Όνομα PC',
         }

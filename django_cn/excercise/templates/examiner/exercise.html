@@ -8,19 +8,29 @@
             <tr>
                 <th>Ονοματεπώνυμο</th>
                 <th>IP</th>
+                <th>calculated IP</th>
+                <th>MAC address</th>
                 <th>Άσκηση</th>
                 <th>Έτος</th>
                 {% if group %}<th>Ομάδα</th>{% endif %}
             </tr>
             <tr>
                 <td>{{student_fullname}}</td>
-                <td>wip</td>
+                <td>{{submission.ip}}</td>
+                <td>{{submission.calculated_ip}}</td>
+                <td>{{submission.mac_address}}</td>
                 <td>{{exercise.number}}</td>
                 <td>{{exercise.course.school_year}}</td>
                 {% if group %}<td>{{group}}</td>{% endif %}
             </tr>
         </table>
-        <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title}}</h3>
+        {% if submission.comments %}
+        <div class="panel">
+            <strong>Σχόλια φοιτητή:</strong><br>
+            {{submission.comments}}
+        </div>
+        {% endif %}
+        <h3><span>Εργαστηριακή Άσκηση {{ exercise.number }}</span>{{ exercise.title|safe}}</h3>
 </section>
 
 <section class="qas">

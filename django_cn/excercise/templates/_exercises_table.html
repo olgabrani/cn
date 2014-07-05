@@ -10,7 +10,7 @@
     {% if course.name == exercise.course_name %}
     <tr>
         <td>{{ exercise.number }}</td>
-        <td>{{ exercise.title }}</td>
+        <td>{{ exercise.title|safe }}</td>
         <td class="status">
             {% if exercise.has_submission_link %}
             <a href="{% url 'exercise' course.code exercise.number %}">

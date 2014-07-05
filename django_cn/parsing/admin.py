@@ -9,7 +9,6 @@ class ParseAdmin(admin.ModelAdmin):
     list_display = ('name', 'exercise')
     def save_model(self, request, obj, form, change):
         exercise_id = obj.exercise.pk
-        print exercise_id
         try:
             # get file path
             f_path = os.path.join(settings.BASE_DIR, obj.document.path)
@@ -27,23 +26,24 @@ class ParseAdmin(admin.ModelAdmin):
                     d['text'] = res[1]
                     arr.append(d)
                 else:
-                    if len(arr) > 1:
-                        d = arr[-1]
+                    if len(arr) > 0:
+                        i = len(arr)-1
+                        d = arr[i]
                         d['text'] = d['text'] + res[0]
-                    else:
-                        theory = res[0]
+                    #else:
+                        #print ('edw2')
+                        #theory = res[0]
 
-            # if flag purge is True, delete all questions associated with this exercise
+            #if flag purge is True, delete all questions associated with this exercise
             if obj.purge == True:
                 questions = Question.objects.filter(exercise_id=exercise_id)
-                questions.delete()
-            
+                for q in questions:
+                    q.delete()
             #import new questions 
-            if theory:            
-                q = Question.objects.create(exercise_id=exercise_id, order=0, text=theory, answer_type='E')
+            #if theory:            
+                #q = Question.objects.get_or_create(exercise_id=exercise_id, order=0, text=theory, answer_type='E')
             for a in arr:
-                q = Question.objects.create(exercise_id=exercise_id, order=a['num'], text=a['text'])
-
+                q = Question.objects.get_or_create(exercise_id=exercise_id, order=a['num'], text=a['text'])
             f.close()
             obj.save()
 
@@ -79,8 +79,9 @@ class SuggestedAdmin(admin.ModelAdmin):
             # if flag purge is True, delete all questions associated with this exercise
             if obj.purge == True:
                 questions = Question.objects.filter(exercise_id=exercise_id)
-                questions.suggested_answer = None
-                questions.save()
+                for q in questions:
+                    q.suggested_answer = None
+                    q.save()
             
             #import new answers 
             for a in arr:

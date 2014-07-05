@@ -12,7 +12,6 @@ from filebrowser.fields import FileBrowseField
 from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], ["^excercise\.models\.MACAddressField"])
 
-
 MAC_RE = r'^([0-9a-fA-F]{2}([:-]?|$)){6}$'
 mac_re = re.compile(MAC_RE)
 
@@ -86,7 +85,7 @@ class Course(models.Model):
         ('W', 'Winter'),
     )
     name = models.CharField(max_length=128)
-    code = models.CharField(max_length=64, help_text="The code should be the same as the moodle code for this course")
+    code = models.CharField(max_length=64)
     semester = models.CharField(max_length=1, choices=SEMESTERS, default='E')
     is_active = models.BooleanField(default=True)
 
@@ -105,7 +104,7 @@ class Course(models.Model):
    
     @property
     def exercises(self):
-        return self.exercise_set.filter(is_active=True).order_by('number')
+        return self.exercise_set.filter(is_active=True)
     
     @property
     def moodle_course_id(self):
@@ -235,7 +234,7 @@ class Exercise(models.Model):
 
     def submission_code(self, user):
         try:
-            submission_code = Submission.objects.get(exercise = self, student = user).state or 'O'
+            submission_code = Submission.objects.get(exercise = self, student = user).state
         except:
             submission_code = 'O'
         return submission_code
@@ -243,16 +242,13 @@ class Exercise(models.Model):
 
     def submission_state(self, user):
 
-        dict = {'I': 'Ημιτελής', 'C': 'Υπεβλήθη', 'S': 'Υπεβλήθη', None: 'open'}
+        dict = {'I': 'Ημιτελής', 'C': 'Υπεβλήθη', 'S': 'Υπεβλήθη'}
         try:
-            s_state = Submission.objects.get(exercise = self, student=user).state
-            if s_state:
-                state = dict.get(s_state)
-            else: 
-                state = 'Ανοιχτή'
+            submission_obj = Submission.objects.get(exercise = self, student=user).state
+            submission = dict.get(submission_obj)
         except:
-            state = 'Ανοιχτή'
-        return state   
+            submission = 'Ανοιχτή'
+        return submission    
 
     def cnt_submissions(self, group_id=None, filtering=None):
         cnt = 0
@@ -321,7 +317,7 @@ class Submission(models.Model):
     student = models.ForeignKey(User)
     datetime_submitted = models.DateTimeField(null=True, blank=True)
     datetime_corrected = models.DateTimeField(null=True, blank=True)
-    state = models.CharField(max_length=1, choices = SUBMISSION_STATE)
+    state = models.CharField(max_length=1, choices = SUBMISSION_STATE, default='I')
     grade = models.CharField(max_length=2, null=True, blank=True)
     examiner = models.ForeignKey(User, related_name="submission_examiner",null=True, blank=True)
     #ip is the IP claimed by the user
@@ -365,119 +361,6 @@ class Grade(models.Model):
     
     def __unicode__(self):
         return "%s (%s) Grade: %s" % (self.student, self.course, self.grade) 
-
-class MdlUser(models.Model):
-    confirmed = models.IntegerField()
-    deleted = models.IntegerField()
-    suspended = models.IntegerField()
-    username = models.CharField(max_length=100)
-    password = models.CharField(max_length=255)
-    idnumber = models.CharField(max_length=255)
-    firstname = models.CharField(max_length=100)
-    lastname = models.CharField(max_length=100)
-    email = models.CharField(max_length=100)
-   
-    def is_enrolled(self, course_code):
-        return self.username
-   
-    @property
-    def fullname(self):
-        return "%s %s" % (self.firstname, self.lastname)
-
-    class Meta:
-        managed = False
-        db_table = 'mdl_user'
-
-class MdlCourse(models.Model):
-    shortname = models.CharField(max_length=255)
-    idnumber = models.CharField(max_length=100)
-        
-    class Meta:
-        managed = False
-        db_table = 'mdl_course'
-
-class MdlUserEnrolments(models.Model):
-    status = models.BigIntegerField()
-    enrolid = models.BigIntegerField()
-    userid = models.BigIntegerField()
-    
-    @property
-    def course_code(self):
-        courseid = MdlEnrol.objects.using('users').get(pk=self.enrolid).courseid
-        course_code = MdlCourse.objects.using('users').get(pk=courseid).shortname
-        return course_code
-
-    def is_role(self, role_id):
-        courseid = MdlEnrol.objects.using('users').get(pk=self.enrolid).courseid
-        contexts = MdlContext.objects.using('users').filter(instanceid=courseid)
-        c_ids = []
-        for c in contexts:
-            c_ids.append(c.pk)
-        try: 
-            r = MdlRoleAssignments.objects.using('users').get(roleid=role_id,contextid__in=c_ids, userid=self.userid)
-            return True
-        except:
-            return False
-
-    @property
-    def is_student(self):
-        return self.is_role(settings.STUDENT_ROLE_ID)
-    
-    @property
-    def is_examiner(self):
-        return self.is_role(settings.EXAMINER_ROLE_ID) or self.is_role(settings.TEACHER_ROLE_ID)
-    
-    @property
-    def is_teacher(self):
-        return self.is_role(settings.TEACHER_ROLE_ID)
-       
-  
-    class Meta:
-        managed = False
-        db_table = 'mdl_user_enrolments'
-
-class MdlEnrol(models.Model):
-    enrol = models.CharField(max_length=20)
-    status = models.BigIntegerField()
-    courseid = models.BigIntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'mdl_enrol'
-
-class MdlGroups(models.Model):
-    courseid = models.BigIntegerField()
-    name = models.CharField(max_length=254)
-   
-    class Meta:
-        managed = False
-        db_table = 'mdl_groups'
-
-class MdlGroupsMembers(models.Model):
-    groupid = models.BigIntegerField()
-    userid = models.BigIntegerField()
-                            
-    class Meta:
-        managed = False
-        db_table = 'mdl_groups_members'
-
-class MdlRoleAssignments(models.Model):
-    roleid = models.BigIntegerField()
-    contextid = models.BigIntegerField()
-    userid = models.BigIntegerField()
-    
-    class Meta:
-        managed = False
-        db_table = 'mdl_role_assignments'
-
-class MdlContext(models.Model):
-    instanceid = models.BigIntegerField()
-    
-    class Meta:
-        managed = False
-        db_table = 'mdl_context'
-
-
 
 class ProxyUser(User):
     class Meta:
