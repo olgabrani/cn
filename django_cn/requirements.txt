@@ -18,6 +18,7 @@ netaddr==0.7.11
 pisa==3.0.33
 pyPdf==1.13
 pydot==1.0.2
+pygraphviz==1.2
 pyparsing==1.5.7
 python-ldap==2.4.15
 pytz==2014.3

@@ -57,7 +57,7 @@
                 <a href="" class="star" title="mark this answer as suggested answer" data-question="{{q.pk}}">&nbsp;</a>
                 <div>{{q.answer}}</div>
             {% elif q.answer_type == 'I' %}
-                {{q.img_tag}}
+                {{q.img_tag|safe}}
             {% endif %}
             </div>
             {% if q.answer_type == 'T' %}
