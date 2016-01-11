@@ -17,6 +17,6 @@ _build
 
 *.egg
 *.tar.gz
-django_cn/local.py
-django_cn/documents/*
-django_cn/uploads/*
+**/django_cn/local.py
+**/django_cn/documents/*
+**/django_cn/uploads/*

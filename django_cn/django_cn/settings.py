@@ -140,6 +140,6 @@ FONT_PATH = "/home/user/DejaVuSansMono.ttf"
 ALLOWED_NETWORKS = ['1.1.1.1']
 
 try:
-    from local_settings import *
+    from local import *
 except ImportError as e:
     pass
